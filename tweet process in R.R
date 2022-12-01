@@ -8,55 +8,81 @@ library(tidyverse)
 out_dir="/nfs/turbo/seas-zhukai/phenology/Twitter/"
 category = "pollen"
 year="2022"
-month_list=c("04","11")
+month_list=seq(1,10) %>% as.character() %>% str_pad(2,"left","0")
 day="01"
 df_allmonths<-vector(mode="list")
 for (month in month_list) {
-  all_files = list.files(paste0(out_dir,category, "/","CSV/",year,"/",month,"/", day, "/"), pattern=".csv", full.names = T)
-  df_list<-vector(mode="list")
-  for (file in all_files) {
-    df_list[[file]]<-read_delim(file, delim="\t"
-                                , escape_backslash=T # escape characters like \n
-    )
+  day_list = list.dirs(paste0(out_dir,"query/",category, "/","CSV/",year,"/",month, "/"), recursive = F) %>% 
+    str_sub(-2)
+  
+  df_alldays<-vector(mode="list")
+  for (day in day_list) {
+    all_files = list.files(paste0(out_dir,"query/",category, "/","CSV/",year,"/",month,"/", day, "/"), pattern=".csv", full.names = T)
+    df_list<-vector(mode="list")
+    for (file in all_files) {
+      df_list[[file]]<-read_delim(file, delim="\t"
+                                  , escape_backslash=T # escape characters like \n
+      )
+    }
+    df_alldays[[day]]<-bind_rows(df_list) %>% 
+      as_tibble() %>% 
+      mutate(day=day)
   }
-  df_allmonths[[month]]<-bind_rows(df_list) %>% 
+  df_allmonths[[month]]<-bind_rows(df_alldays) %>% 
     as_tibble() %>% 
     mutate(month=month)
   # df %>% head(10)
 }
 df<-bind_rows(df_allmonths)
+# write_csv(df, )
+
 # get time series
 # about time zone https://zacharyst.com/2017/04/05/assigning-the-correct-time-to-a-tweet/
 library(lubridate)
 df_ts_list<-vector(mode="list")
-for (monthoi in month_list) {
+monthday_grid<-df %>% 
+  distinct(month, day)
+for (i in 1:nrow(monthday_grid)) {
   df_ts<-df %>% 
-    filter(month==monthoi) %>% 
+    filter(month==monthday_grid$month[i],
+           day==monthday_grid$day[i]) %>% 
     mutate(time=paste(created_at %>% substr(5,10),created_at %>% substr(27,30),created_at %>% substr(12,19)) %>% 
              parse_date_time("BdY HMS")
     ) %>% 
     mutate(hour=hour(time),
            date=date(time)) %>% 
-    group_by(month,date,hour) %>% 
+    group_by(date,hour) %>% 
     summarise(count=n()) %>% 
     mutate(time=as_datetime(date)+dhours(hour)) %>% 
-    group_by(month) %>% 
     right_join(data.frame(time=seq(min(.$time),max(.$time),by="hour"))) %>% 
     arrange(time) %>% 
     mutate(count=replace_na(count,0)) %>% 
-    mutate(month=monthoi,
+    mutate(#month=monthday_grid$month[i],
+           #day=monthday_grid$day[i],
            hour=hour(time),
+           month=month(time),
+           day=day(time),
            date=date(time)
-           ) %>% 
-    ungroup()
-  df_ts_list[[monthoi]]<-df_ts
+           ) 
+  df_ts_list[[i]]<-df_ts
 }
 df_ts<-bind_rows(df_ts_list)
 
 ggplot(df_ts)+
-  geom_line(aes(x=time, y=count))+
-  theme_classic()+
-  facet_wrap(.~month, ncol=1, scales = "free_x")
+  geom_point(aes(x=time, y=count))+
+  theme_classic()#+
+  # facet_wrap(.~month, ncol=1, scales = "free_x")
+
+ggplot(df_ts %>% 
+         group_by(date) %>% 
+         summarise(count=sum(count)))+
+  geom_point(aes(x=date, y=count ))+
+  theme_classic()#+
+
+# climate change
+df_CC<-df %>% 
+  filter(str_detect(full_text, "climat|early|worse|worst|warm"))
+df_CC$full_text
 
 # political ideology
 my_oauth <- list(consumer_key = "REMOVED",
@@ -142,13 +168,13 @@ df<-df %>%
              type = "full")
   )
 
-# df_test = data.frame(
-#   text = c(
-#     "I love walking in nature - so serene",
-#     "Why are the government not stopping the destruction of the rainforest?!",
-#     "Tiger wins the PGA tour again!"),
-#   stringsAsFactors = F)
-# df_test$text = classecol::clean(df_test$text, level = "full")
+df_test = data.frame(
+  text = c(
+    "I love walking in nature - so serene",
+    "Why are the government not stopping the destruction of the rainforest?!",
+    "Tiger wins the PGA tour again!"),
+  stringsAsFactors = F)
+df_test$text = classecol::clean(df_test$text, level = "full")
 
 text = df %>% 
   mutate(full_text=gsub('[[:punct:]]+', ",", full_text)) %>%

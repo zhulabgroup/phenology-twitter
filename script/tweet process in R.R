@@ -1,51 +1,79 @@
 library(tidyverse)
-
+# library(devtools)
+# install_github("trinker/qdapRegex")
+unloadNamespace('textclean')
+library(qdapRegex)
+library(doSNOW)
+library(parallel)
+library(lubridate)
 # toInstall <- c("ggplot2", "scales", "R2WinBUGS", "devtools", "yaml", "httr", "RJSONIO")
 # install.packages(toInstall, repos = "http://cran.r-project.org")
 # library(devtools)
 # install_github("pablobarbera/twitter_ideology/pkg/tweetscores")
 
-out_dir="/nfs/turbo/seas-zhukai/phenology/Twitter/"
 category = "pollen"
-year="2022"
-month_list=seq(1,10) %>% as.character() %>% str_pad(2,"left","0")
-day="01"
-df_allmonths<-vector(mode="list")
-for (month in month_list) {
-  day_list = list.dirs(paste0(out_dir,"query/",category, "/","CSV/",year,"/",month, "/"), recursive = F) %>% 
-    str_sub(-2)
+years_list<-seq(2021,2022) %>% as.character()
+for (year in years_list) {
+  month_list=seq(1,12) %>% as.character() %>% str_pad(2,"left","0")
   
-  df_alldays<-vector(mode="list")
-  for (day in day_list) {
-    all_files = list.files(paste0(out_dir,"query/",category, "/","CSV/",year,"/",month,"/", day, "/"), pattern=".csv", full.names = T)
-    df_list<-vector(mode="list")
-    for (file in all_files) {
-      df_list[[file]]<-read_delim(file, delim="\t"
-                                  , escape_backslash=T # escape characters like \n
-      )
-    }
-    df_alldays[[day]]<-bind_rows(df_list) %>% 
-      as_tibble() %>% 
-      mutate(day=day)
-  }
-  df_allmonths[[month]]<-bind_rows(df_alldays) %>% 
-    as_tibble() %>% 
-    mutate(month=month)
-  # df %>% head(10)
+  cl <- makeCluster(12)
+  registerDoSNOW(cl)
+  df_allmonths<-
+    foreach (month = month_list,
+             .packages=c("tidyverse", "lubridate","qdapRegex")) %dopar% {
+               day_list = list.dirs(paste0("./data/query/",category, "/","CSV/",year,"/",month, "/"), recursive = F) %>% 
+                 str_sub(-2)
+               
+               df_alldays<-vector(mode="list")
+               for (day in day_list) {
+                 all_files = list.files(paste0("./data/query/",category, "/","CSV/",year,"/",month,"/", day, "/"), pattern=".csv", full.names = T)
+                 df_list<-vector(mode="list")
+                 for (file in all_files) {
+                   df_list[[file]]<-read_delim(file, delim="\t"
+                                               , escape_backslash=T # escape characters like \n
+                   ) %>% 
+                     mutate(full_text=
+                              rm_url(full_text, pattern=pastex("@rm_twitter_url", "@rm_url"))) # https://stackoverflow.com/questions/25352448/remove-urls-from-string
+                 }
+                 df_alldays[[day]]<-bind_rows(df_list) %>% 
+                   as_tibble() %>% 
+                   mutate(day=day)
+               }
+               bind_rows(df_alldays) %>% 
+                 as_tibble() %>% 
+                 mutate(month=month)
+               # df %>% head(10)
+             }
+  df<-bind_rows(df_allmonths)%>% 
+    arrange(month, day) %>% 
+    distinct(full_text, .keep_all = T)
+  
+  write_rds(df,paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds") )
+  
+  stopCluster(cl)
 }
-df<-bind_rows(df_allmonths)
-# write_csv(df, )
+
+df_compiled_list<-vector(mode="list")
+for (year in years_list) {
+  df_compiled_list[[year]]<-read_rds(paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds")) %>% 
+    mutate(year=year)
+}
+df_compiled<-bind_rows(df_compiled_list)
 
 # get time series
 # about time zone https://zacharyst.com/2017/04/05/assigning-the-correct-time-to-a-tweet/
 library(lubridate)
-df_ts_list<-vector(mode="list")
-monthday_grid<-df %>% 
-  distinct(month, day)
-for (i in 1:nrow(monthday_grid)) {
-  df_ts<-df %>% 
-    filter(month==monthday_grid$month[i],
-           day==monthday_grid$day[i]) %>% 
+day_grid<-df_compiled %>% 
+  distinct(year,month, day)
+cl <- makeCluster(20)
+registerDoSNOW(cl)
+df_ts_list<-
+  foreach (i = 1:nrow(day_grid),
+         .packages = c("tidyverse", "lubridate")) %dopar% {
+  df_ts<-df_compiled %>% 
+    filter(year==day_grid$year[i],
+           month==day_grid$month[i],
+           day==day_grid$day[i]) %>% 
     mutate(time=paste(created_at %>% substr(5,10),created_at %>% substr(27,30),created_at %>% substr(12,19)) %>% 
              parse_date_time("BdY HMS")
     ) %>% 
@@ -60,29 +88,49 @@ for (i in 1:nrow(monthday_grid)) {
     mutate(#month=monthday_grid$month[i],
            #day=monthday_grid$day[i],
            hour=hour(time),
+           year=year(time),
            month=month(time),
            day=day(time),
            date=date(time)
            ) 
-  df_ts_list[[i]]<-df_ts
+  df_ts
 }
 df_ts<-bind_rows(df_ts_list)
+stopCluster(cl)
 
 ggplot(df_ts)+
   geom_point(aes(x=time, y=count))+
   theme_classic()#+
   # facet_wrap(.~month, ncol=1, scales = "free_x")
 
-ggplot(df_ts %>% 
-         group_by(date) %>% 
-         summarise(count=sum(count)))+
-  geom_point(aes(x=date, y=count ))+
-  theme_classic()#+
+p<-ggplot(df_ts %>% 
+            mutate(doy=yday(date)) %>% 
+         group_by(year,doy) %>% 
+         summarise(count=sum(count)) %>% 
+           ungroup()
+         # mutate(count=case_when(count>10~count))
+         )+
+  geom_point(aes(x=doy, y=count , group=year, col=year))+
+  geom_smooth(aes(x=doy, y=count , group=year, col=year), method = "loess", span=0.2)+
+  theme_classic()+
+  scale_color_viridis_c()
+p
+
+cairo_pdf(paste0("./output/multiyear_ts.pdf"))
+p
+dev.off()
 
 # climate change
-df_CC<-df %>% 
-  filter(str_detect(full_text, "climat|early|worse|worst|warm"))
-df_CC$full_text
+
+df_CC<-df_compiled %>% 
+  filter(str_detect(full_text, "climat|warming"))
+paste(nrow(df_CC), "out of", nrow(df_compiled))
+df_CC$full_text %>% head(20)
+
+df_aller<-df_compiled %>% 
+  filter(str_detect(full_text, "allerg|hayfever|hay fever|rhinitis"))
+paste(nrow(df_aller), "out of", nrow(df_compiled))
+df_aller$full_text %>% head(20)
 
 # political ideology
 my_oauth <- list(consumer_key = "REMOVED",
@@ -149,18 +197,21 @@ reticulate::use_python(Sys.which("python3"))
 # system("python3 -m pip install numpy")
 # system("python3 -m pip install nltk")
 # system("python3 -m pip install bs4")
-# system("python3 -m pip install scikit-learn --upgrade")
+system("python3 -m pip install scikit-learn==0.24.2")
 # # https://bobbyhadz.com/blog/python-no-module-named-sklearn
 # # most updated version does not seem to be compatible: No module named 'sklearn.linear_model.stochastic_gradient'
-# system("python3 -m pip install sklearn")
+# system("python3 -m pip uninstall sklearn")
 # system("python3 -m pip install keras")
 # system("python3 -m pip install tensorflow")
 # py_run_string("import nltk")
 # py_run_string("nltk.download('omw-1.4')")
 # # py_run_string("from sklearn.linear_model import SGDClassifier")
-# system("python3 -m pip list")
+system("python3 -m pip list")
 # # need to restart R sometimes
 
+py_run_string("from sklearn.linear_model.stochastic_gradient import SGDClassifier")
+py_run_string("import sklearn")
+py_run_string("from sklearn.linear_model import SGDClassifier")
 df<-df %>% 
   mutate(class=
            bio_class(

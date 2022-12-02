@@ -42,9 +42,9 @@ df = sqlContext.read.json(inputFile)
 
 #Keep data where text or extended tweet text matches the keywords
 filtered = df.where( (udf_keyword_match(F.lower(F.col('text')))) 
-	| ( (df.truncated == True) 
-		& ( udf_keyword_match(F.lower(F.col('extended_tweet.text'))) )
-		) 
+	# | ( (df.truncated == True) 
+	# 	& ( udf_keyword_match(F.lower(F.col('extended_tweet.full_text'))) )
+	# 	) 
 	)
 
 #Write the filtered data to the output path.

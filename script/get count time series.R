@@ -1,24 +1,7 @@
-df_compiled_list<-vector(mode="list")
-for (year in years_list) {
-  df_compiled_list[[year]]<-read_rds(paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds")) %>% 
-    mutate(year=year)
-}
-df_compiled<-bind_rows(df_compiled_list)
-
 # get time series
 # about time zone https://zacharyst.com/2017/04/05/assigning-the-correct-time-to-a-tweet/
 library(lubridate)
-day_grid<-df_compiled %>% 
-  distinct(year,month, day)
-cl <- makeCluster(20)
-registerDoSNOW(cl)
-df_ts_list<-
-  foreach (i = 1:nrow(day_grid),
-           .packages = c("tidyverse", "lubridate")) %dopar% {
              df_ts<-df_compiled %>% 
-               filter(year==day_grid$year[i],
-                      month==day_grid$month[i],
-                      day==day_grid$day[i]) %>% 
                mutate(time=paste(created_at %>% substr(5,10),created_at %>% substr(27,30),created_at %>% substr(12,19)) %>% 
                         parse_date_time("BdY HMS")
                ) %>% 
@@ -38,10 +21,6 @@ df_ts_list<-
                  day=day(time),
                  date=date(time)
                ) 
-             df_ts
-           }
-df_ts<-bind_rows(df_ts_list)
-stopCluster(cl)
 
 ggplot(df_ts)+
   geom_point(aes(x=time, y=count))+

@@ -8,6 +8,10 @@ library(parallel)
 library(lubridate)
 
 category = "pollen"
+
+keywords<-read_lines(paste0("./script/keywords/",category, ".txt"))
+key_regex<-regex(paste("\\b", keywords, "\\b", sep = "", collapse = "|"))
+
 years_list<-seq(2021,2022) %>% as.character()
 for (year in years_list) {
   month_list=seq(1,12) %>% as.character() %>% str_pad(2,"left","0")
@@ -25,11 +29,22 @@ for (year in years_list) {
                  all_files = list.files(paste0("./data/query/",category, "/","CSV/",year,"/",month,"/", day, "/"), pattern=".csv", full.names = T)
                  df_list<-vector(mode="list")
                  for (file in all_files) {
-                   df_list[[file]]<-read_delim(file, delim="\t"
+                   df_day<-read_delim(file, delim="\t"
+                                      ,col_types=cols(.default = "c")
                                                , escape_backslash=T # escape characters like \n
-                   ) %>% 
-                     mutate(full_text=
-                              rm_url(full_text, pattern=pastex("@rm_twitter_url", "@rm_url"))) # https://stackoverflow.com/questions/25352448/remove-urls-from-string
+                   ) 
+                   if ("full_text" %in% colnames(df_day)) {
+                     df_day<-df_day %>% 
+                       mutate(text=case_when(!is.na(full_text)~full_text,
+                              TRUE~text)) %>% 
+                       select(-full_text)
+                   }
+                   df_day<-df_day %>% 
+                     filter(lang=="en") %>% 
+                     filter(str_detect(text, key_regex)) %>% 
+                     mutate(text=
+                              rm_url(text, pattern=pastex("@rm_twitter_url", "@rm_url"))) # https://stackoverflow.com/questions/25352448/remove-urls-from-string
+                 df_list[[file]]<-df_day
                  }
                  df_alldays[[day]]<-bind_rows(df_list) %>% 
                    as_tibble() %>% 
@@ -42,7 +57,7 @@ for (year in years_list) {
              }
   df<-bind_rows(df_allmonths)%>% 
     arrange(month, day) %>% 
-    distinct(full_text, .keep_all = T)
+    distinct(text, .keep_all = T)
   
   write_rds(df,paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds") )
   
@@ -50,16 +65,13 @@ for (year in years_list) {
 }
 
 
-# climate change
+df_compiled_list<-vector(mode="list")
+for (year in years_list) {
+  df_compiled_list[[year]]<-read_rds(paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds")) %>% 
+    mutate(year=year)
+}
+df_compiled<-bind_rows(df_compiled_list)
 
-df_CC<-df_compiled %>% 
-  filter(str_detect(full_text, "climat|warming"))
-paste(nrow(df_CC), "out of", nrow(df_compiled))
-df_CC$full_text %>% head(20)
 
-df_aller<-df_compiled %>% 
-  filter(str_detect(full_text, "allerg|hayfever|hay fever|rhinitis"))
-paste(nrow(df_aller), "out of", nrow(df_compiled))
-df_aller$full_text %>% head(20)
 
 

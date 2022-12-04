@@ -20,5 +20,5 @@ do
 	/home/songyl/GitHub/pheno_tweet/script/tool/gardenhose_filter.py \
 	-k /home/songyl/GitHub/pheno_tweet/script/keywords/${CAT}.txt \
 	-i file:///scratch/zhukai_root/zhukai0/songyl/${YEA}/*/gardenhose.${YEA}-${MON}-${d}*.bz2 \
-	-o /nfs/turbo/seas-zhukai/phenology/Twitter/query/${CAT}/Spark/${YEA}/${MON}/${d}
+	-o /home/songyl/GitHub/pheno_tweet/data/query/${CAT}/Spark/${YEA}/${MON}/${d}
 done

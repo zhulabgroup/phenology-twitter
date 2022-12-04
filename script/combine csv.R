@@ -10,9 +10,10 @@ library(lubridate)
 category = "pollen"
 
 keywords<-read_lines(paste0("./script/keywords/",category, ".txt"))
-key_regex<-regex(paste("\\b", keywords, "\\b", sep = "", collapse = "|"))
+key_regex<-regex(paste("\\b(?i)", keywords, "\\b", sep = "", collapse = "|"))
 
-years_list<-seq(2021,2022) %>% as.character()
+years_list<-c(2012,2020,2021,2022) %>% as.character()
+
 for (year in years_list) {
   month_list=seq(1,12) %>% as.character() %>% str_pad(2,"left","0")
   
@@ -44,6 +45,7 @@ for (year in years_list) {
                      filter(str_detect(text, key_regex)) %>% 
                      mutate(text=
                               rm_url(text, pattern=pastex("@rm_twitter_url", "@rm_url"))) # https://stackoverflow.com/questions/25352448/remove-urls-from-string
+                   # rm_tag() available
                  df_list[[file]]<-df_day
                  }
                  df_alldays[[day]]<-bind_rows(df_list) %>% 
@@ -72,6 +74,21 @@ for (year in years_list) {
 }
 df_compiled<-bind_rows(df_compiled_list)
 
+df_senti_test<-df_compiled %>% 
+  mutate(text=str_replace(text,"\n", " ")) %>% 
+  sample_n(100) %>% 
+  pull(text)
+
+write_lines(df_senti_test, "./output/senti_test.txt")
+
+df_poli_test<-df_compiled %>% 
+  mutate(meta=paste(screen_name, description)) %>% 
+  mutate(meta=str_replace(meta, "\n", " ")) %>% 
+  mutate(meta=str_replace(meta, "NA", " ")) %>% 
+  sample_n(10) %>% 
+  pull(meta)
+
+write_lines(df_poli_test, "./output/poli_test.txt")
 
 
 

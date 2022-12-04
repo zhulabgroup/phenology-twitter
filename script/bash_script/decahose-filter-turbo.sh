@@ -17,8 +17,8 @@ D=`seq -w ${STA} ${X}`
 for d in ${D}
 do
 	spark-submit --num-executors 20 --executor-memory 8g \
-	/nfs/turbo/twitter-decahose/tools/decahose-filter/decahose_filter.py \
-	-k /nfs/turbo/seas-zhukai/phenology/Twitter/keywords/${CAT}.txt \
+	/home/songyl/GitHub/pheno_tweet/script/tool/decahose_filter.py \
+	-k /nfs/turbo/seas-zhukai/phenology/Twitter/script/keywords/${CAT}.txt \
 	-i file:///nfs/turbo/twitter-decahose/decahose/raw/decahose.${YEA}-${MON}-${d}*.bz2 \
-	-o /nfs/turbo/seas-zhukai/phenology/Twitter/query/${CAT}/Spark/${YEA}/${MON}/${d}
+	-o /home/songyl/GitHub/pheno_tweet/data/query/${CAT}/Spark/${YEA}/${MON}/${d}
 done

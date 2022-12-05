@@ -12,7 +12,7 @@ category = "pollen"
 keywords<-read_lines(paste0("./script/keywords/",category, ".txt"))
 key_regex<-regex(paste("\\b(?i)", keywords, "\\b", sep = "", collapse = "|"))
 
-years_list<-c(2012,2020,2021,2022) %>% as.character()
+years_list<-c(2012,2016,2018,2019,2020,2021,2022) %>% as.character()
 
 for (year in years_list) {
   month_list=seq(1,12) %>% as.character() %>% str_pad(2,"left","0")
@@ -57,9 +57,9 @@ for (year in years_list) {
                  mutate(month=month)
                # df %>% head(10)
              }
-  df<-bind_rows(df_allmonths)%>% 
-    arrange(month, day) %>% 
-    distinct(text, .keep_all = T)
+  df<-bind_rows(df_allmonths)#%>% 
+    # arrange(month, day) %>% 
+    # distinct(text, .keep_all = T)
   
   write_rds(df,paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds") )
   
@@ -74,6 +74,10 @@ for (year in years_list) {
 }
 df_compiled<-bind_rows(df_compiled_list)
 
+df_loc<-df_compiled %>% 
+  filter(!is.na(location))
+paste(nrow(df_loc), "out of", nrow(df_compiled))
+
 df_senti_test<-df_compiled %>% 
   mutate(text=str_replace(text,"\n", " ")) %>% 
   sample_n(100) %>% 
@@ -81,14 +85,6 @@ df_senti_test<-df_compiled %>%
 
 write_lines(df_senti_test, "./output/senti_test.txt")
 
-df_poli_test<-df_compiled %>% 
-  mutate(meta=paste(screen_name, description)) %>% 
-  mutate(meta=str_replace(meta, "\n", " ")) %>% 
-  mutate(meta=str_replace(meta, "NA", " ")) %>% 
-  sample_n(10) %>% 
-  pull(meta)
-
-write_lines(df_poli_test, "./output/poli_test.txt")
 
 
 

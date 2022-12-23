@@ -1,18 +1,15 @@
 library(tidyverse)
-# library(devtools)
-# install_github("trinker/qdapRegex")
-unloadNamespace('textclean')
-library(qdapRegex)
+# # library(devtools)
+# # install_github("trinker/qdapRegex")
+# unloadNamespace('textclean')
+# library(qdapRegex)
 library(doSNOW)
 library(parallel)
 library(lubridate)
 
 category = "pollen"
 
-keywords<-read_lines(paste0("./script/keywords/",category, ".txt"))
-key_regex<-regex(paste("\\b(?i)", keywords, "\\b", sep = "", collapse = "|"))
-
-years_list<-c(2012,2016,2018,2019,2020,2021,2022) %>% as.character()
+years_list<-c(2012,2013,2014,2015,2016,2018,2019,2020,2021,2022) %>% as.character()
 
 for (year in years_list) {
   month_list=seq(1,12) %>% as.character() %>% str_pad(2,"left","0")
@@ -40,12 +37,17 @@ for (year in years_list) {
                               TRUE~text)) %>% 
                        select(-full_text)
                    }
-                   df_day<-df_day %>% 
-                     filter(lang=="en") %>% 
-                     filter(str_detect(text, key_regex)) %>% 
-                     mutate(text=
-                              rm_url(text, pattern=pastex("@rm_twitter_url", "@rm_url"))) # https://stackoverflow.com/questions/25352448/remove-urls-from-string
-                   # rm_tag() available
+                   if ("reply" %in% colnames(df_day)) {
+                     df_day<-df_day %>% 
+                       mutate(reply=case_when(!is.na(reply)~1,
+                                             TRUE~0)) 
+                   }
+                   if ("retweet" %in% colnames(df_day)) {
+                     df_day<-df_day %>% 
+                       mutate(retweet=case_when(!is.na(retweet)~1,
+                                              TRUE~0)) 
+                   }
+                   
                  df_list[[file]]<-df_day
                  }
                  df_alldays[[day]]<-bind_rows(df_list) %>% 
@@ -61,7 +63,7 @@ for (year in years_list) {
     # arrange(month, day) %>% 
     # distinct(text, .keep_all = T)
   
-  write_rds(df,paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds") )
+  write_rds(df,paste0("./data/query/",category, "/","RDS/",year,".rds") )
   
   stopCluster(cl)
 }
@@ -69,21 +71,13 @@ for (year in years_list) {
 
 df_compiled_list<-vector(mode="list")
 for (year in years_list) {
-  df_compiled_list[[year]]<-read_rds(paste0("./data/query/",category, "/","CSV/",year,"/","compiled.rds")) %>% 
+  df_compiled_list[[year]]<-read_rds(paste0("./data/query/",category, "/","RDS/",year,".rds")) %>% 
     mutate(year=year)
 }
 df_compiled<-bind_rows(df_compiled_list)
+write_rds(df_compiled,paste0("./data/processed/compiled.rds") )
 
-df_loc<-df_compiled %>% 
-  filter(!is.na(location))
-paste(nrow(df_loc), "out of", nrow(df_compiled))
-
-df_senti_test<-df_compiled %>% 
-  mutate(text=str_replace(text,"\n", " ")) %>% 
-  sample_n(100) %>% 
-  pull(text)
-
-write_lines(df_senti_test, "./output/senti_test.txt")
+nrow(df_compiled)
 
 
 

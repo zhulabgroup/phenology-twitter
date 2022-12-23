@@ -1,3 +1,14 @@
+library(tidyverse)
+df_clean<-read_rds("./data/processed/processed.rds")
+
+user_list<-df_clean %>% 
+  select(user_screen_name, clean_text) %>% 
+  right_join(df_CC %>% 
+               select(clean_text)
+             , by=c("clean_text")) %>% 
+  pull(user_screen_name) %>% 
+  unique()
+length(user_list)
 # toInstall <- c("ggplot2", "scales", "R2WinBUGS", "devtools", "yaml", "httr", "RJSONIO")
 # install.packages(toInstall, repos = "http://cran.r-project.org")
 # library(devtools)
@@ -12,11 +23,11 @@ my_oauth <- list(consumer_key = "REMOVED",
 # load package
 library(tweetscores)
 # downloading friends of a user
-user_list<-df$screen_name %>% unique()
+
 ideology_list<-vector(mode="list")
-for (user in user_list[1:15]) {
+for (user in user_list) {
   out1<-tryCatch( {
-    friends <- getFriends(screen_name=user, oauth=my_oauth)
+    friends <- getFriends(screen_name=user, oauth=my_oauth, sleep = 60)
   },
   error = function(e){ 
     return (numeric(0))
@@ -44,10 +55,11 @@ for (user in user_list[1:15]) {
     }
     
   }
-  # Sys.sleep(60)
+  print(paste(user,ideology_list[[user]]))
+  Sys.sleep(61)
 }
-ideology_df<-bind_rows(ideology_list)
-write_csv(ideology_df, "/nfs/turbo/seas-zhukai/phenology/Twitter/ideology_test2.csv")
+df_ideology<-bind_rows(ideology_list)
+write_rds(df_ideology, "./output/ideology.rds")
 
 # https://github.com/twintproject/twint/issues/1346
 

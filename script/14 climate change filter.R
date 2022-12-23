@@ -1,0 +1,31 @@
+library(tidyverse)
+df_clean<-read_rds("./data/processed/processed.rds")
+
+df_text_distinct<-df_clean %>% 
+  distinct(clean_text, .keep_all = T) 
+nrow(df_text_distinct)
+
+
+# climate change
+
+# CC_keywords<-read_lines(paste0("./script/keywords/CC.txt"))
+CC_keywords<-c("climate", "warming")
+CC_key_regex<-regex(paste( "\\b(?i)",CC_keywords,"\\b",sep="", collapse = "|"))
+
+df_CC<-df_text_distinct %>% 
+  filter(str_detect(clean_text, CC_key_regex)) #%>% 
+  # filter(!str_detect(text, "Study|study")) #%>%
+  # filter(!str_detect(text, "Nothing to sneeze at"))
+paste(nrow(df_CC), "out of", nrow(df_text_distinct))
+df_CC %>% sample_n(min(10, nrow(.))) %>% select(user_screen_name,text)
+
+# df_CC_test<-df_CC %>% 
+#   sample_n(100) %>% 
+#   pull(text)
+# 
+# write_lines(df_CC_test, "./output/CC_test.txt")
+
+# df_aller<-df_compiled %>% 
+#   filter(str_detect(text, "allerg|hayfever|hay fever|rhinitis"))
+# paste(nrow(df_aller), "out of", nrow(df_compiled))
+# df_aller$text %>% head(20)

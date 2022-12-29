@@ -1,3 +1,4 @@
+library(lubridate)
 df_tweet<-read_rds("./data/processed/processed.rds")
 
 df_geo_all<-read_rds("./data/processed/geocoding.rds")
@@ -12,11 +13,13 @@ df_tw_state<-df_tweet %>%
             days=date %>% unique() %>% length()
             ) %>% 
   ungroup() %>% 
-  mutate(intensity=(count/days)^(1/2)) %>%
   mutate(state=toupper(state)) %>%
   mutate(state=case_when(state=="DC"~"district of columbia",
                          TRUE~state.name[match(state,state.abb)])) %>%
+  left_join(data.frame(state=state.x77 %>% rownames(), population=state.x77[,"Population"]), by="state") %>% 
   mutate(state=tolower(state)) %>%
+  mutate(intensity=(count/days)^(1/2)) %>%
+  # mutate(intensity=(count/days)^(1/2)/(population)) %>%
   select(state,year, intensity) %>%
   # spread(key="year", value="intensity") %>% 
   # gather(key="year", value="intensity",-state) %>% 
@@ -25,7 +28,7 @@ df_tw_state<-df_tweet %>%
 df_tw_state
 
 df_tw_map<- map_data("state") %>% 
-  full_join(df_state_intensity, by=c("region"="state")) 
+  full_join(df_tw_state, by=c("region"="state")) 
 
 p_map <- ggplot() +
   geom_polygon(data = map_data("state"), aes(x = long, y = lat, group = group), fill = "grey80") +

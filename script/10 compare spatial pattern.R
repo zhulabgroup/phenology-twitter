@@ -2,7 +2,6 @@ nab_station<-nab_with_taxa_df %>%
   filter(family=="Total") %>% 
   mutate(year=year(date)) %>% 
   full_join(site_year, by=c("id", "year")) %>% 
-  left_join(nab_state_name, by="location") %>% 
   select(lat, lon,location, year,date, state,count) %>%
   group_by(lat, lon,location,year) %>% 
   summarise(count=sum(count),
@@ -84,4 +83,5 @@ ggplot(df_state_compare%>% filter(year<=2017) )+
   scale_color_viridis_c()
 
 library(nlme)
+lm(data=df_state_compare%>% filter(year<=2017), tweet~pollen) %>% summary()
 lme(data=df_state_compare%>% filter(year<=2017), tweet~pollen, random = ~ 1 | year) %>% summary()

@@ -19,6 +19,16 @@ df_CC<-df_text_distinct %>%
 paste(nrow(df_CC), "out of", nrow(df_text_distinct))
 df_CC %>% sample_n(min(10, nrow(.))) %>% select(user_screen_name,text)
 
+df_CC_forlabel<-df_CC %>% 
+  select(user_screen_name,user_description ,text, clean_text, type) %>% 
+  mutate(pollen_phenology="",
+         climate_change="",
+         belief="",
+         sentiment="",
+         causation="",
+         direction="",
+         science="")
+write_csv(df_CC_forlabel, "./output/pollen_CC_coding.csv")
 # df_CC_test<-df_CC %>% 
 #   sample_n(100) %>% 
 #   pull(text)

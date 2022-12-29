@@ -25,16 +25,17 @@ library(tweetscores)
 # downloading friends of a user
 
 ideology_list<-vector(mode="list")
-for (user in user_list) {
+for (i in 1:length(user_list)) {
+  user=user_list[i]
   out1<-tryCatch( {
-    friends <- getFriends(screen_name=user, oauth=my_oauth, sleep = 60)
+    friends <- getFriends(screen_name=user, oauth=my_oauth, sleep = 1)
   },
   error = function(e){ 
     return (numeric(0))
   })
   
   if (length(out1)==0) {
-    ideology_list[[user]]<-data.frame(user=user, ideology=NA)
+    ideology_list[[user]]<-data.frame(user=user, ideology=NA, friends=NA)
   } else {
     # estimate ideology with MCMC method
     # results <- estimateIdeology(user, friends, method="MLE")
@@ -49,19 +50,23 @@ for (user in user_list) {
     })
     
     if (out2!=999) {
-      ideology_list[[user]]<-data.frame(user=user, ideology=results)
+      ideology_list[[user]]<-data.frame(user=user, ideology=results, friends=paste(friends,  collapse=","))
     } else {
-      ideology_list[[user]]<-data.frame(user=user, ideology=999)
+      ideology_list[[user]]<-data.frame(user=user, ideology=999, friends=paste(friends,  collapse=","))
     }
     
   }
-  print(paste(user,ideology_list[[user]]))
-  Sys.sleep(61)
+  print(ideology_list[[user]])
+  Sys.sleep(60)
 }
 df_ideology<-bind_rows(ideology_list)
 write_rds(df_ideology, "./output/ideology.rds")
 
 # https://github.com/twintproject/twint/issues/1346
 
-ideology_df %>% head(15) %>% filter(ideology!=999) %>% pull(ideology) %>% median(na.rm=T)
-ideology_df %>% head(15) %>% filter(ideology!=999) %>% pull(ideology) %>% hist()
+df_ideology %>% head(15) %>% filter(ideology!=999) %>% pull(ideology) %>% median(na.rm=T)
+df_ideology %>% 
+  filter(ideology!=999)  %>% 
+  ggplot()+
+  geom_histogram(aes(ideology))+
+  theme_classic()

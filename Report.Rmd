@@ -131,12 +131,13 @@ source("script/16 ideology network.R")
 p_net
 ```
 
-Collecting some more ideology scores now, but existing data from `r nrow(df_CC_net_ideo)` data points show weak evidence of this correlation.
+Based on `r nrow(df_CC_net_ideo)` pairs of source and target,  found a statistically significant positive correlation (Spearman, _p_ <= 0.05) between the ideology of source and targets.
 
 ```{r}
 p_ideo_reg
-wc_res
-
+pearson_res
+spearman_res
 ```
 
+**Message 3**: Although both left- and right-leaning users have generally similar belief in the climate change impacts on pollen season, possibly attributed to the exposure to expert opinion, the partisan bias is still very strong in terms of the source of information. People are more likely to receive information from sources with a similar political ideology. This result is consistent with the information theory in social psychology, suggesting that individuals choose to interact with others who hold similar beliefs (homophily). It is encouraging that this knowledge of climate change impacts on pollen season reach diverse audience, but there may still be information silo in the communication of this knowledge across partisans.
 

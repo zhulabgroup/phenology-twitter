@@ -26,7 +26,10 @@ user_list_add<-df_CC_net %>%
 # write_rds(df_ideology_add, "./output/ideology_add.rds")
 
 df_ideology_full<-bind_rows(read_rds("./output/ideology.rds") %>% as_tibble(),
-                            read_rds("./output/ideology_add.rds") %>% as_tibble())
+                            read_rds("./output/ideology_add.rds") %>% as_tibble()) %>% 
+  filter(ideology!=999,
+         !is.na(ideology),
+         is.finite(ideology)) 
 
 source_list<-df_CC_net %>% 
   group_by(from) %>% 
@@ -62,7 +65,7 @@ p_net<-ggplot(CC_net) +
   geom_nodes(aes(x, y
                  , color = ideology
                  ), size=3, alpha = 1) +
-  geom_nodetext(aes(x,y,label = vertex.names),
+  geom_nodetext_repel(aes(x,y,label = vertex.names),
                        data = function(x) { x[ x$source == T, ]}) +
   # geom_nodelabel(aes(x,y,label = vertex.names)) +
   scale_color_gradient2(low="blue", high="red", mid = "antiquewhite")+
@@ -76,9 +79,14 @@ df_CC_net_ideo<-df_CC_net %>%
   left_join(df_ideology_full %>% select(from=user, from_ideo=ideology), by="from") %>% 
   drop_na()
 p_ideo_reg<-ggplot(df_CC_net_ideo,aes(x=from_ideo, y=to_ideo))+
-  geom_jitter(alpha=0.5, size=2)+
+  ggrepel::geom_label_repel(data=df_CC_net_ideo %>% filter(from %in%source_list) %>% group_by(from) %>% sample_n(1) %>% ungroup(),
+                           aes(label=from, color=from_ideo))+
+  scale_color_gradient2(low="blue", high="red", mid = "antiquewhite")+
+  guides(color = "none") +
+  geom_point(alpha=0.5, size=2)+
   geom_smooth(method="lm")+
   theme_classic()+
   labs(x="source ideology",
        y="target ideology")
-wc_res<-wilcox.test(df_CC_net_ideo$from_ideo, df_CC_net_ideo$to_ideo)
+pearson_res<-cor.test(df_CC_net_ideo$from_ideo, df_CC_net_ideo$to_ideo)
+spearman_res<-cor.test(df_CC_net_ideo$from_ideo, df_CC_net_ideo$to_ideo, method = "spearman")

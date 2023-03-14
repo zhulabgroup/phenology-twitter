@@ -2,7 +2,7 @@ df_tweet<-read_rds("./data/processed/processed.rds")
 # get time series
 # about time zone https://zacharyst.com/2017/04/05/assigning-the-correct-time-to-a-tweet/
 library(lubridate)
-df_tw<-df_tweet %>% 
+df_tw_ts<-df_tweet %>% 
    # mutate(time=paste(created_at %>% substr(5,10),created_at %>% substr(27,30),created_at %>% substr(12,19)) %>% 
    #          parse_date_time("BdY HMS")
    # ) %>% 
@@ -23,7 +23,7 @@ df_tw<-df_tweet %>%
                 , by=c("year", "doy","date" ,"type"))  # add NA to gap dates
    
 
-p<-ggplot(df_tw %>% filter(type=="organic"))+
+p<-ggplot(df_tw_ts %>% filter(type=="organic"))+
   geom_point(aes(x=doy, y=(count)^(1/2) , group=year, col=year), alpha=0.5)+
   # geom_smooth(aes(x=doy, y=(count) ^(1/2), group=year, col=year), method = "loess", span=0.2, se=F)+
   theme_classic()+
@@ -56,7 +56,7 @@ whitfun <- function(x, lambda) {
   return(x)
 }
 
-df_tw_process<-df_tw %>% 
+df_tw_process<-df_tw_ts %>% 
   group_by(type) %>% 
   mutate(count_in = na.approx(count, date, na.rm = F, maxgap = 14)) %>%
   # mutate(count_fill = replace_na(count_in, 0)) %>%

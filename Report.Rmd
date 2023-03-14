@@ -1,0 +1,142 @@
+---
+title: "Report on Partisan Perceptual Bias"
+date: "2023-03-14"
+output:
+  prettydoc::html_pretty:
+    theme: cayman
+    highlight: github
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, cache = TRUE)
+```
+
+
+```{r}
+source("script/14 climate change filter.R")
+```
+
+I filtered all tweets with the keywords of "climate" and "warming." I obtained `r nrow(df_CC_label_full)` climate-pollen tweets, leading to `r nrow(df_CC)` distinct cleaned tweets for further labeling. Here is a sample of some tweets.
+```{r}
+df_CC %>% sample_n(min(10, nrow(.))) %>% select(user_screen_name,text) 
+```
+
+I manually labeled all distinct climate-pollen tweets to select for those related to climate change driving earlier, longer, and more intense pollen seasons. I then distinguished the tweets that showed belief or disbelief of this effect, and if the tweets are based on expert opinions (scientific report, news, communication with scientists) or are personal opinions.
+
+Here I show some samples of belief and disbelief in the climate change effect.
+```{r}
+df_CC_label_full %>% 
+  filter(causation ==1) %>% 
+  group_by(belief) %>% 
+  sample_n(5) %>% 
+  select(text, belief) %>% 
+  mutate(belief=case_when(belief==0~ "belief",
+                   belief==1~"disbelief"))
+```
+
+Here I show some samples of tweets based on expert opinions and personal opinions.
+```{r}
+df_CC_label_full %>% 
+  filter(causation ==1) %>% 
+  group_by(science) %>% 
+  sample_n(5) %>% 
+  select(text, science) %>% 
+  mutate(science=case_when(science==0~ "personal",
+                   science==1~"expert"))
+```
+
+```{r}
+source("script/15 political ideology.R")
+```
+
+I scored the political ideology of all `r length(user_list_CC)` users posting climate-pollen tweets using the package _tweetscores_. The scores were calculated based on the influential (political) account an user is following. Many users cannot be scored as they did not authorize data retrieval, deleted their accounts, or did not follow influential accounts.
+
+As a contrast, I also randomly selected 1000 pollen tweets, obtained a list of unique users, and scored their political ideology. 
+
+# General belief
+**Research question 1**: Is there a partisan bias on how likely people are to believe in the climate change impacts on pollen season?   
+
+**Hypothesis 1**: A left-leaning user is more likely to express belief and less likely to express disbelief in climate change impacts on pollen season compared to a right-leaning user, if they both talk about pollen. Specifically, the statistical distributions of political ideology scores differ between those who discuss pollen and those who also expressed belief or disbelief in climate change impacts. Specifically, 
+
+```{r}
+res<-compare_ideo_dist(df_CC_ideo, belief_sel = 1, science_sel = c(0,1))
+```
+
+Here is a comparison of the distributions of political ideology scores in the wide user group discussing pollen (blue) and among the smaller user group (`r res$n` users) (red) that stated belief in climate change impacts.
+
+The differences between the two distributions was not statistically significant (Kolmogorov-Smirnov test, _p_ > 0.05), although the general comparison of the proportion of left vs. right individuals was consistent with our hypothesis.
+
+```{r}
+res$p_density
+res$cross_tab %>%  knitr::kable()
+res$ks_res
+```
+
+**Message 1.1**: There did not seem to be a significant partisan bias on the belief in climate change effects on pollen season. Both left- and right-leaning users that have attention on pollen have a similar probability of supporting this belief. This is an encouraging message for climate change education, as pollen phenology might provide a powerful message can raise climate change awareness in both parties.
+
+```{r}
+res<-compare_ideo_dist(df_CC_ideo, belief_sel = 0, science_sel = c(0,1))
+```
+
+I further compared the distributions of political ideology scores in the wide user group discussing pollen (blue) and among the smaller user group (`r res$n` users) (red) that expressed disbelief in climate change impacts. There were very few tweets (<10) that expressed disbelief and they are almost all from right-leaning individuals.
+
+The differences between the two distributions was statistically significant (_p_ <= 0.05), although the general comparison of the proportion of left vs. right individuals was consistent with our hypothesis.
+
+```{r}
+res$p_density
+res$cross_tab %>%  knitr::kable()
+res$ks_res
+```
+
+**Message 1.2**: The message of climate change impacts on pollen season receives some skepticism, mostly by right-leaning users, although the proportion of disbelief is small compared to the popular opinion.
+
+# Knowledge production
+**Research question 2**: Is there a partisan bias on how people communicate this belief personally, without an immediate influence of media?   
+
+**Hypothesis 2**: A left-leaning user is more likely to _personally comment on_ climate change impacts on pollen season compared to a right-leaning user, if they both talk about pollen. Specifically, the statistical distributions of political ideology scores differ between those who discuss pollen and those who also expressed belief in climate change impacts _based on personal opinion_.
+
+```{r}
+res<-compare_ideo_dist(df_CC_ideo, belief_sel = 1, science_sel = c(0))
+```
+
+There were `r res$n` users expressed belief on climate change impacts on pollen seasons based on personal opinion (red). The partisan bias on personal opinion was marginally significant (_p_ = 0.057), being a lot stronger than the non-significant bias on belief based on expert opinion and personal opinion taken together.
+```{r}
+res$p_density
+res$cross_tab %>%  knitr::kable()
+res$ks_res
+```
+
+```{r}
+res<-compare_ideo_dist(df_CC_ideo, belief_sel = 1, science_sel = c(1))
+```
+
+In contrast, when only looking at belief expressed based on expert opinion (`r res$n` users) (red), the partisan bias was again non-significant.
+
+```{r}
+res$p_density
+res$cross_tab %>%  knitr::kable()
+res$ks_res
+```
+
+**Message 2**: The lack of overall partisan bias shown in Question 1 may be attributed to a top-down approach, i.e., large exposure to expert opinions, communicated through scientific articles, news reports, and experts' personal communication. On the other hand, the knowledge distribution via the bottom-up approach, i.e., personal opinion by non-experts, is still likely to have a partisan bias. Although the message of climate change impacts on pollen season may reach right-leaning users well, the message may be less likely to be amplified through personal communications in right-leaning communities.
+
+# Knowledge distribution
+**Research question 3**: Is there a partisan bias in the distribution of this belief in the social network?   
+
+**Hypothesis 3**: A user is more likely to receive and distribute information on climate change impacts on pollen season from a user or similar ideology. Specifically, the ideology of the target user (user who expressed belief) has a statistically significant correlation with the ideology of the source (mentioned, retweeted, or replied user).
+
+As a preliminary analysis, I explored a network around influential nodes in the network communicating climate change impacts on pollen season.
+```{r}
+source("script/16 ideology network.R")
+p_net
+```
+
+Collecting some more ideology scores now, but existing data from `r nrow(df_CC_net_ideo)` data points show weak evidence of this correlation.
+
+```{r}
+p_ideo_reg
+wc_res
+
+```
+
+

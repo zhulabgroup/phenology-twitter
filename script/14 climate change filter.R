@@ -3,8 +3,7 @@ df_clean<-read_rds("./data/processed/processed.rds")
 
 df_text_distinct<-df_clean %>% 
   distinct(clean_text, .keep_all = T) 
-nrow(df_text_distinct)
-
+# nrow(df_text_distinct)
 
 # climate change
 
@@ -16,8 +15,8 @@ df_CC<-df_text_distinct %>%
   filter(str_detect(clean_text, CC_key_regex)) #%>% 
   # filter(!str_detect(text, "Study|study")) #%>%
   # filter(!str_detect(text, "Nothing to sneeze at"))
-paste(nrow(df_CC), "out of", nrow(df_text_distinct))
-df_CC %>% sample_n(min(10, nrow(.))) %>% select(user_screen_name,text)
+# paste(nrow(df_CC), "out of", nrow(df_text_distinct))
+# df_CC %>% sample_n(min(10, nrow(.))) %>% select(user_screen_name,text)
 
 df_CC_forlabel<-df_CC %>% 
   select(user_screen_name,user_description ,text, clean_text, type) %>% 
@@ -28,7 +27,14 @@ df_CC_forlabel<-df_CC %>%
          causation="",
          direction="",
          science="")
-write_csv(df_CC_forlabel, "./output/pollen_CC_coding.csv")
+# write_csv(df_CC_forlabel, "./output/pollen_CC_coding.csv")
+df_CC_label <- read_csv( "./output/pollen_CC_coding_labeled_03122023.csv") %>% as_tibble()
+
+df_CC_label_full<-df_clean %>% 
+  select(user=user_screen_name, text, clean_text, type) %>% 
+  inner_join(df_CC_label %>% 
+               select(clean_text, pollen_phenology, climate_change, causation, belief, sentiment, science),
+             by="clean_text")
 # df_CC_test<-df_CC %>% 
 #   sample_n(100) %>% 
 #   pull(text)

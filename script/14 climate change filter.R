@@ -35,11 +35,34 @@ df_CC_label_full<-df_clean %>%
   inner_join(df_CC_label %>% 
                select(clean_text, pollen_phenology, climate_change, causation, belief, sentiment, science),
              by="clean_text")
-# df_CC_test<-df_CC %>% 
-#   sample_n(100) %>% 
-#   pull(text)
-# 
-# write_lines(df_CC_test, "./output/CC_test.txt")
+
+# weather
+T_keywords<-c("weather","temperature","warm", "warming","hot", "hotter","spring")
+T_key_regex<-regex(paste( "\\b(?i)",T_keywords,"\\b",sep="", collapse = "|"))
+
+df_T<-df_text_distinct %>% 
+  filter(str_detect(clean_text, T_key_regex)) #%>% 
+
+df_T_sample<-  %>% 
+  sample_n(1000)
+
+df_T_forlabel<-df_T %>% 
+  select(user_screen_name,user_description ,text, clean_text, type) %>% 
+  mutate(pollen_phenology="",
+         temperature_change="",
+         belief="",
+         sentiment="",
+         causation="",
+         direction="",
+         science="")
+write_csv(df_T_forlabel, "./output/pollen_T_coding.csv")
+df_T_label <- read_csv( "./output/pollen_T_coding_labeled_03122023.csv") %>% as_tibble()
+
+df_T_label_full<-df_clean %>% 
+  select(user=user_screen_name, text, clean_text, type) %>% 
+  inner_join(df_CC_label %>% 
+               select(clean_text, pollen_phenology, climate_change, causation, belief, sentiment, science),
+             by="clean_text")
 
 # df_aller<-df_compiled %>% 
 #   filter(str_detect(text, "allerg|hayfever|hay fever|rhinitis"))

@@ -27,6 +27,8 @@ user_list_add<-df_CC_net %>%
 
 df_ideology_full<-bind_rows(read_rds("./output/ideology.rds") %>% as_tibble(),
                             read_rds("./output/ideology_add.rds") %>% as_tibble()) %>% 
+  select(-ideology) %>% 
+  rename(ideology=ideology2) %>% 
   filter(ideology!=999,
          !is.na(ideology),
          is.finite(ideology)) 

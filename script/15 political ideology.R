@@ -1,24 +1,6 @@
 library(tidyverse)
 df_clean <- read_rds("./data/processed/processed.rds")
 
-set.seed(1)
-user_list_rand <- df_clean %>%
-  sample_n(1000) %>%
-  pull(user_screen_name) %>%
-  unique()
-# length(user_list_rand)
-
-user_list_CC <- df_clean %>%
-  select(user_screen_name, clean_text) %>%
-  right_join(
-    df_CC %>%
-      select(clean_text),
-    by = c("clean_text")
-  ) %>%
-  pull(user_screen_name) %>%
-  unique()
-# length(user_list_CC)
-
 # political ideology
 my_oauth <- list(
   consumer_key = "REMOVED",
@@ -33,13 +15,14 @@ my_oauth <- list(
 # library(devtools)
 # install_github("pablobarbera/twitter_ideology/pkg/tweetscores")
 library(tweetscores)
-# downloading friends of a user
 
 source("script/tool/getFriends_patch.R")
 get_ideo <- function(user_list) {
   ideology_list <- vector(mode = "list")
   for (i in 1:length(user_list)) {
     user <- user_list[i]
+    
+    # downloading friends of a user
     out1 <- tryCatch(
       {
         friends <- getFriends_new(screen_name = user, oauth = my_oauth, sleep = 60)
@@ -48,14 +31,13 @@ get_ideo <- function(user_list) {
         return(numeric(0))
       }
     )
-
-    if (length(out1) == 0) {
+    
+    # estimate ideology
+    if (length(out1) == 0) { # if friend ids are not available
       ideology_list[[user]] <- data.frame(user = user, ideology = NA, friends = NA)
     } else {
-      # estimate ideology with MCMC method
-      # results <- estimateIdeology(user, friends, method="MLE")
-      # summary(results)
-
+      # estimation using MCMC takes too long, not implemented
+      
       # estimation using MLE
       out2 <- tryCatch(
         {
@@ -69,7 +51,7 @@ get_ideo <- function(user_list) {
       if (out2 == 999) {
         score1 <- 999
       }
-
+      
       # estimation using correspondence analysis
       out3 <- tryCatch(
         {
@@ -83,7 +65,7 @@ get_ideo <- function(user_list) {
       if (out3 == 999) {
         score2 <- 999
       }
-
+      
       ideology_list[[user]] <- data.frame(user = user, ideology = score1, ideology2 = score2, friends = paste(friends, collapse = ","))
     }
     print(i)
@@ -94,22 +76,21 @@ get_ideo <- function(user_list) {
   return(df_ideology)
 }
 
-if (FALSE) {
-  df_ideology_rand <- get_ideo(user_list = user_list_rand)
-  write_rds(df_ideology_rand, "./output/ideology_rand.rds")
-
-  df_ideology <- get_ideo(user_list = user_list_CC)
-  write_rds(df_ideology, "./output/ideology.rds")
+df_group_sample_list <- read_rds("data/processed/group_sample_list.rds")
+for (group in group_list) {
+  users <- df_group_sample_list[[group]] %>% 
+    pull(user_screen_name) %>%
+    unique() %>% 
+    sort()
+  
+  df_ideology <- get_ideo(user_list = users)
+  write_rds(df_ideology, str_c("./data/processed/ideology/", group,".rds"))
 }
 
-# https://github.com/twintproject/twint/issues/1346
-
-# df_ideology %>% head(15) %>% filter(ideology!=999) %>% pull(ideology) %>% median(na.rm=T)
-# df_ideology %>%
-#   filter(ideology!=999)  %>%
-#   ggplot()+
-#   geom_histogram(aes(ideology))+
-#   theme_classic()
+df_group_ideo_list<- vector(mode = "list")
+for (group in group_list) {
+  df_group_ideo_list[[group]] <- read_rds(str_c("./data/processed/ideology/", group,".rds"))
+}
 
 ### analysis
 df_ideology <- read_rds("./output/ideology.rds") %>%

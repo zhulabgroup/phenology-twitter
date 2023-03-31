@@ -10,7 +10,7 @@ for (group in group_list) {
     df_group <- df_clean
   } 
   if (group == "pollen-weather") {
-    T_keywords<-c("weather", "temperature", "warm", "warming", "hot", "hotter", "spring")
+    T_keywords<-c("weather", "temperature", "warm", "warmer","warming", "hot", "hotter", "spring")
     T_key_regex<-regex(paste( "\\b(?i)",T_keywords,"\\b",sep="", collapse = "|"))
     
     df_group<-df_clean %>% 

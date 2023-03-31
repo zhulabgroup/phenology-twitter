@@ -87,54 +87,56 @@ for (group in group_list) {
   write_rds(df_ideology, str_c("./data/processed/ideology/", group,".rds"))
 }
 
-df_group_ideo_list<- vector(mode = "list")
+
+# analysis
+
+df_group_sample_list<- read_rds("data/processed/group_sample_list.rds")
+
+df_group_list<- vector(mode = "list")
 for (group in group_list) {
-  df_group_ideo_list[[group]] <- read_rds(str_c("./data/processed/ideology/", group,".rds"))
+  df_group_coding <- read_csv(str_c("./data/processed/coding/", group,"_labeled.csv"))
+  if (group == "pollen") {
+    df_group_valid <- df_group_coding %>% 
+      filter(pollen_phenology == 1)
+  }
+  if (group == "pollen-weather") {
+    df_group_valid <- df_group_coding %>% 
+      filter(pollen_phenology == 1,
+             weather_change ==1,
+             causation ==1)
+  }
+  if (group == "pollen-climate") {
+    df_group_valid <- df_group_coding %>% 
+      filter(pollen_phenology == 1,
+             climate_change ==1,
+             causation ==1)
+  }
+  
+  df_group_ideo <- read_rds(str_c("./data/processed/ideology/", group,".rds"))
+  
+  df_group<-df_group_sample_list[[group]] %>% 
+    select(user = user_screen_name, clean_text) %>% 
+    right_join(df_group_valid %>% select(clean_text), 
+               by = "clean_text") %>% 
+    select(-clean_text) %>% 
+    distinct(user) %>% 
+    left_join(df_group_ideo %>% 
+                select(user, ideology=ideology2),
+              by = "user") %>% 
+    mutate(group = group)
+  
+  df_group_list[[group]] <- df_group
 }
+df_ideo_allgroups<-bind_rows(df_group_list) %>% 
+  filter(ideology != 999) %>% 
+  filter(!is.na(ideology)) %>% 
+  filter(is.finite(ideology))
+
+df_ideo_density <- ggplot(df_ideo_allgroups)+
+  geom_density(aes(x = ideology, fill = group, col= group),alpha=0.5)+
+  theme_classic()
 
 ### analysis
-df_ideology <- read_rds("./output/ideology.rds") %>%
-  as_tibble() %>%
-  select(-ideology) %>%
-  rename(ideology = ideology2)
-df_CC_label <- read_csv("./output/pollen_CC_coding_labeled_03122023.csv") %>% as_tibble()
-
-df_CC_ideo <- df_clean %>%
-  select(user = user_screen_name, text, clean_text, type) %>%
-  inner_join(
-    df_CC_label %>%
-      select(clean_text, pollen_phenology, climate_change, causation, belief, sentiment, science),
-    by = "clean_text"
-  ) %>%
-  left_join(
-    df_ideology %>%
-      select(user, ideology),
-    by = "user"
-  ) %>%
-  filter(
-    pollen_phenology == 1,
-    climate_change == 1
-  ) %>%
-  filter(
-    !is.na(ideology),
-    ideology != 999,
-    is.finite(ideology)
-  ) %>%
-  filter(causation == 1)
-
-# df_CC_ideo_sel %>%  filter(ideology>0) %>% View()
-
-df_rand_ideo <- read_rds("./output/ideology_rand.rds") %>%
-  as_tibble() %>%
-  select(-ideology) %>%
-  rename(ideology = ideology2)
-
-df_rand_ideo_sel <- df_rand_ideo %>%
-  filter(
-    !is.na(ideology),
-    ideology != 999,
-    is.finite(ideology)
-  )
 
 compare_ideo_dist <- function(df_CC_ideo, belief_sel, science_sel) {
   df_CC_ideo_sel <- df_CC_ideo %>%

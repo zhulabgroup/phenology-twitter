@@ -1,6 +1,6 @@
-nab_path<-"/nfs/turbo/seas-zhukai/phenology/RS4flower/NAB/"
-nab_df <- read_rds(paste0(nab_path,"nab_dat.rds"))
-nab_taxa_df <- read_rds(paste0(nab_path,"nab_taxa.rds"))
+nab_path <- "/nfs/turbo/seas-zhukai/phenology/RS4flower/NAB/"
+nab_df <- read_rds(paste0(nab_path, "nab_dat.rds"))
+nab_taxa_df <- read_rds(paste0(nab_path, "nab_taxa.rds"))
 
 nab_with_taxa_df <- nab_df %>%
   rename(taxa_raw = taxa) %>%

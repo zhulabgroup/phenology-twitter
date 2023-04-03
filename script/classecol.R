@@ -28,32 +28,38 @@ system("python3 -m pip list")
 py_run_string("from sklearn.linear_model.stochastic_gradient import SGDClassifier")
 py_run_string("import sklearn")
 py_run_string("from sklearn.linear_model import SGDClassifier")
-df<-df %>% 
-  mutate(class=
-           bio_class(
-             text_vector = paste(screen_name, description),
-             type = "full")
+df <- df %>%
+  mutate(
+    class =
+      bio_class(
+        text_vector = paste(screen_name, description),
+        type = "full"
+      )
   )
 
-df_test = data.frame(
+df_test <- data.frame(
   text = c(
     "I love walking in nature - so serene",
     "Why are the government not stopping the destruction of the rainforest?!",
-    "Tiger wins the PGA tour again!"),
-  stringsAsFactors = F)
-df_test$text = classecol::clean(df_test$text, level = "full")
+    "Tiger wins the PGA tour again!"
+  ),
+  stringsAsFactors = F
+)
+df_test$text <- classecol::clean(df_test$text, level = "full")
 
-text = df %>% 
-  mutate(full_text=gsub('[[:punct:]]+', ",", full_text)) %>%
-  pull(full_text) %>% 
-  `Encoding<-` ("latin1" )%>% 
-  textclean::replace_non_ascii()# %>% 
+text <- df %>%
+  mutate(full_text = gsub("[[:punct:]]+", ",", full_text)) %>%
+  pull(full_text) %>%
+  `Encoding<-`("latin1") %>%
+  textclean::replace_non_ascii() # %>%
 # classecol::clean(level = "full")
-sm = as.matrix(cbind(
+sm <- as.matrix(cbind(
   valence(text),
   lang_eng(text),
-  senti_matrix(text)))
+  senti_matrix(text)
+))
 nat_class(
   text_vector = text,
   senti = sm,
-  type = "trimmed")
+  type = "trimmed"
+)

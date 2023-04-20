@@ -1,13 +1,8 @@
-library(tidyverse)
-df_clean <- read_rds("./data/processed/processed.rds")
+df_clean <- read_rds(.path$dat_process)
 
-library(syuzhet)
 df_text_distinct <- df_clean %>%
   distinct(clean_text) %>%
   rename(text = clean_text)
-nrow(df_text_distinct)
-
-library("tm")
 
 text_all <- df_text_distinct %>% pull(text)
 
@@ -38,30 +33,35 @@ text2dtm <- function(text) {
   return(dtm)
 }
 
-library(tidytext)
 dtm_all <- text2dtm(text_all)
 df_text_tidy <- tidy(dtm_all) %>%
   group_by(word = term) %>%
   summarise(count = sum(count)) %>%
   arrange(desc(count)) %>%
-  filter(word != "pollen")
+  filter(word != "pollen") %>%
+  rename(freq = count)
 # m <- as.matrix(dtm)
 # v <- sort(rowSums(m),decreasing=TRUE)
 # d <- data.frame(word = names(v),freq=v)
 # head(d, 10)
 
 # bar chart of most frequent words found in the tweets
-df_text_tidy %>%
+p_keyword_bar <- df_text_tidy %>%
   head(15) %>%
-  mutate(word = reorder(word, count)) %>%
-  ggplot(aes(x = word, y = count)) +
+  mutate(word = reorder(word, freq)) %>%
+  ggplot(aes(x = word, y = freq)) +
   geom_col() +
   xlab(NULL) +
-  coord_flip()
+  ylab("count") +
+  coord_flip() +
+  theme_minimal()
 
-library(wordcloud)
-set.seed(1)
-wordcloud(df_text_tidy$word, df_text_tidy$count,
-  min.freq = 1000, scale = c(3.5, .5), random.order = FALSE, rot.per = 0.35,
-  colors = brewer.pal(8, "Dark2")
-)
+if (FALSE) {
+  hw <- wordcloud2(df_text_tidy %>% head(1000))
+  saveWidget(hw, str_c(.path$fig_wc, "wordcloud.html"), selfcontained = F)
+  webshot::webshot(str_c(.path$fig_wc, "wordcloud.html"), str_c(.path$fig_wc, "wordcloud.png"),
+    vwidth = 1000, vheight = 600, delay = 10
+  )
+}
+p_keyword_cloud <- cowplot::ggdraw() +
+  cowplot::draw_image(str_c(.path$fig_wc, "wordcloud.png"))

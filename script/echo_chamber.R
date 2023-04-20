@@ -1,65 +1,74 @@
-library(network)
-library(sna)
-library(tidyverse)
-library(ggnetwork)
-
-df_CC_net <- df_CC_ideo %>%
+df_net_sample <- ls_df_group_sample[["pollen-climate"]]$sample
+df_net_valid <- read_csv(str_c(.path$dat_coding, "pollen-climate", "_labeled.csv")) %>%
   filter(
     pollen_phenology == 1,
-    climate_change == 1
+    climate_change == 1,
+    causation == 1
+  )
+df_net_ideo <- read_rds(str_c(.path$dat_ideo, "pollen-climate", ".rds")) %>%
+  select(user, ideology = ideology2)
+
+df_net <- df_net_sample %>%
+  select(user = user_screen_name, clean_text, text, type) %>%
+  right_join(df_net_valid %>% select(clean_text),
+    by = "clean_text"
   ) %>%
-  filter(
-    !is.na(ideology),
-    ideology != 999,
-    is.finite(ideology)
+  left_join(
+    df_net_ideo,
+    by = "user"
   ) %>%
-  filter(causation == 1) %>%
-  select(user, text, type, ideology) %>%
+  filter(ideology != 999) %>%
+  filter(!is.na(ideology)) %>%
+  filter(is.finite(ideology)) %>%
   mutate(mention = str_extract_all(text, "@\\w+")) %>%
   unnest_longer(mention) %>%
   mutate(mention = str_replace(mention, "@", "")) %>%
   group_by(to = user, from = mention) %>%
   summarise(n = n())
 
-user_list_add <- df_CC_net %>%
-  filter(!from %in% user_list_CC) %>%
+v_user_add <- df_net %>%
+  filter(!from %in% df_net_ideo$user) %>%
   pull(from) %>%
   unique()
 
-# df_ideology_add<-get_ideo(user_list = user_list_add)
-# write_rds(df_ideology_add, "./output/ideology_add.rds")
+f_ideo_add <- str_c(.path$dat_ideo, "add.rds")
+if (!file.exists(f_ideo_add)) {
+  df_ideology_add <- get_ideo(v_user = v_user_add)
+  write_rds(df_ideology_add, f_ideo_add)
+} else {
+  df_ideology_add <- read_rds(f_ideo_add) %>% as_tibble()
+}
+df_ideology_add <- df_ideology_add %>%
+  select(user, ideology = ideology2)
 
 df_ideology_full <- bind_rows(
-  read_rds("./output/ideology.rds") %>% as_tibble(),
-  read_rds("./output/ideology_add.rds") %>% as_tibble()
+  df_net_ideo,
+  df_ideology_add
 ) %>%
-  select(-ideology) %>%
-  rename(ideology = ideology2) %>%
   filter(
     ideology != 999,
     !is.na(ideology),
     is.finite(ideology)
   )
 
-source_list <- df_CC_net %>%
+source_list <- df_net %>%
   group_by(from) %>%
   summarise(n = sum(n)) %>%
   arrange(desc(n)) %>%
   filter(n > 1) %>%
   pull(from)
 
-df_CC_net_sel <- filter(df_CC_net) %>%
+df_net_sel <- filter(df_net) %>%
   filter(from %in% source_list) %>%
   select(from, to)
 
-CC_net <- as.network(df_CC_net_sel, directed = TRUE, loops = T)
-# network.edgecount(CC_net)
+net <- as.network(df_net_sel, directed = TRUE, loops = T)
 # ggnetwork(CC_net, layout = "fruchtermanreingold", cell.jitter = 0.75)
 # ggnetwork(CC_net, layout = "target", niter = 100)
 
-CC_net %v% "source" <- data.frame(user = CC_net %v% "vertex.names") %>%
-  mutate(source = user %in% df_CC_net$from)
-CC_net %v% "ideology" <- data.frame(user = CC_net %v% "vertex.names") %>%
+net %v% "source" <- data.frame(user = net %v% "vertex.names") %>%
+  mutate(source = user %in% df_net$from)
+net %v% "ideology" <- data.frame(user = net %v% "vertex.names") %>%
   left_join(
     df_ideology_full %>%
       select(user, ideology) %>%
@@ -73,7 +82,7 @@ CC_net %v% "ideology" <- data.frame(user = CC_net %v% "vertex.names") %>%
   ) %>%
   pull(ideology)
 
-p_net <- ggplot(CC_net) +
+p_net <- ggplot(net) +
   geom_edges(aes(
     x = x, y = y, xend = xend, yend = yend, # ,linewidth=sqrt(n)
   ), color = "grey50", alpha = 1, arrow = arrow(length = unit(0.2, "lines"))) +
@@ -91,18 +100,22 @@ p_net <- ggplot(CC_net) +
   theme_blank()
 
 # regression
-
-df_CC_net_ideo <- df_CC_net %>%
+df_net_reg <- df_net %>%
   left_join(df_ideology_full %>% select(to = user, to_ideo = ideology), by = "to") %>%
   left_join(df_ideology_full %>% select(from = user, from_ideo = ideology), by = "from") %>%
   drop_na()
-p_ideo_reg <- ggplot(df_CC_net_ideo, aes(x = from_ideo, y = to_ideo)) +
+
+p_net_reg <- ggplot(df_net_reg, aes(x = from_ideo, y = to_ideo)) +
   ggrepel::geom_label_repel(
-    data = df_CC_net_ideo %>% filter(from %in% source_list) %>% group_by(from) %>% sample_n(1) %>% ungroup(),
+    data = df_net_reg %>% filter(from %in% source_list) %>% group_by(from) %>% sample_n(1) %>% ungroup(),
     aes(label = from, color = from_ideo)
   ) +
   scale_color_gradient2(low = "blue", high = "red", mid = "antiquewhite") +
   guides(color = "none") +
+  ggpubr::stat_cor(aes(
+    x = from_ideo, y = to_ideo,
+    label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+  )) +
   geom_point(alpha = 0.5, size = 2) +
   geom_smooth(method = "lm") +
   theme_classic() +
@@ -110,5 +123,3 @@ p_ideo_reg <- ggplot(df_CC_net_ideo, aes(x = from_ideo, y = to_ideo)) +
     x = "source ideology",
     y = "target ideology"
   )
-pearson_res <- cor.test(df_CC_net_ideo$from_ideo, df_CC_net_ideo$to_ideo)
-spearman_res <- cor.test(df_CC_net_ideo$from_ideo, df_CC_net_ideo$to_ideo, method = "spearman")

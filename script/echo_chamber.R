@@ -62,7 +62,8 @@ df_net_sel <- filter(df_net) %>%
   filter(from %in% source_list) %>%
   select(from, to)
 
-net <- as.network(df_net_sel, directed = TRUE, loops = T)
+library(sna)
+net <- network::as.network(df_net_sel, directed = TRUE, loops = T)
 # ggnetwork(CC_net, layout = "fruchtermanreingold", cell.jitter = 0.75)
 # ggnetwork(CC_net, layout = "target", niter = 100)
 
@@ -83,13 +84,13 @@ net %v% "ideology" <- data.frame(user = net %v% "vertex.names") %>%
   pull(ideology)
 
 p_net <- ggplot(net) +
-  geom_edges(aes(
+  ggnetwork::geom_edges(aes(
     x = x, y = y, xend = xend, yend = yend, # ,linewidth=sqrt(n)
   ), color = "grey50", alpha = 1, arrow = arrow(length = unit(0.2, "lines"))) +
-  geom_nodes(aes(x, y,
+  ggnetwork::geom_nodes(aes(x, y,
     color = ideology
   ), size = 3, alpha = 1) +
-  geom_nodetext_repel(aes(x, y, label = vertex.names),
+  ggnetwork::geom_nodetext_repel(aes(x, y, label = vertex.names),
     data = function(x) {
       x[x$source == T, ]
     }
@@ -97,7 +98,9 @@ p_net <- ggplot(net) +
   # geom_nodelabel(aes(x,y,label = vertex.names)) +
   scale_color_gradient2(low = "blue", high = "red", mid = "antiquewhite") +
   guides(size = "none") +
-  theme_blank()
+  theme_void()
+
+pacman::p_unload("sna")
 
 # regression
 df_net_reg <- df_net %>%

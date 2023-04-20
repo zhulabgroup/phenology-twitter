@@ -2,13 +2,13 @@ df_nab_full <- read_rds(str_c(.path$dat_nab, "dat_pollen.rds"))
 
 df_nab_ts <- df_nab_full %>%
   filter(
-    date >= date("2012-01-01"),
-    date <= date("2022-12-31")
+    date >= lubridate::date("2012-01-01"),
+    date <= lubridate::date("2022-12-31")
   ) %>%
   filter(family == "Total") %>%
   mutate(
-    doy = yday(date),
-    year = year(date)
+    doy = lubridate::yday(date),
+    year = lubridate::year(date)
   ) %>%
   select(-family, -genus, -taxa)
 

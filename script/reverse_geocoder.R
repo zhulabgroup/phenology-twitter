@@ -13,7 +13,7 @@ if (!file.exists(.path$dat_geo)) {
     mutate(us = case_when(str_detect(user_location, us_regex) ~ "us"))
 
   # search for city coordinate or name
-  source_python("twitter-user-geocoder/tweet_us_city_geocoder.py")
+  source_python("script/tool/twitter-user-geocoder/tweet_us_city_geocoder.py")
   # tug$get_city_state("xxx: (39.76838,-86.15804)")
   # tug$get_city_state("Little Rock, AR")
 

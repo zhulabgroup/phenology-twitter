@@ -5,11 +5,10 @@ df_tw_state <- df_tweet %>%
   left_join(df_geo_all %>% select(user_location, state), by = "user_location") %>%
   filter(!is.na(state)) %>%
   mutate(year = as.integer(year)) %>%
-  mutate(date = date(paste(year, month, day, sep = "-"))) %>%
-  mutate(doy = yday(date)) %>%
+  mutate(date = lubridate::date(paste(year, month, day, sep = "-"))) %>%
+  mutate(doy = lubridate::yday(date)) %>%
   filter(doy > 40, doy <= 180) %>%
   group_by(state, year) %>%
-  mutate(date = date(paste(year, month, day, sep = "-"))) %>%
   summarise(
     count = n(),
     days = date %>% unique() %>% length()

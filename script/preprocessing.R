@@ -27,11 +27,11 @@ if (!file.exists(.path$dat_process)) {
     mutate(clean_text = str_replace_all(text, "\n", " ")) %>%
     mutate(
       clean_text =
-        rm_url(clean_text, pattern = pastex("@rm_twitter_url", "@rm_url"))
+        qdapRegex::rm_url(clean_text, pattern = pastex("@rm_twitter_url", "@rm_url"))
     ) %>% # https://stackoverflow.com/questions/25352448/remove-urls-from-string
-    mutate(clean_text = rm_tag(clean_text, pattern = "@rm_tag")) %>%
+    mutate(clean_text = qdapRegex::rm_tag(clean_text, pattern = "@rm_tag")) %>%
     mutate(clean_text = str_replace_all(clean_text, regex("\\bR+T "), "")) %>%
-    mutate(clean_text = rm_non_words(clean_text, pattern = "@rm_non_words")) %>%
+    mutate(clean_text = qdapRegex::rm_non_words(clean_text, pattern = "@rm_non_words")) %>%
     mutate(clean_text = iconv(clean_text, from = "UTF-8", to = "ASCII", sub = "")) %>%
     filter(str_detect(clean_text, key_regex))
   nrow(df_clean)

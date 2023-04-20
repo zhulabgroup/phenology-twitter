@@ -7,9 +7,9 @@ if (!file.exists(f_perp)) {
   df_perplexity <- data.frame(k = v_k, perplexity = NA)
   ls_lda <- vector(mode = "list")
   for (i in 1:nrow(df_perplexity)) {
-    lda <- LDA(dtm_all, k = df_perplexity$k[i], control = list(seed = 1, alpha = 0.01))
+    lda <- topicmodels::LDA(dtm_all, k = df_perplexity$k[i], control = list(seed = 1, alpha = 0.01))
     ls_lda[[i]] <- lda
-    df_perplexity$perplexity[i] <- perplexity(lda)
+    df_perplexity$perplexity[i] <- topicmodels::perplexity(lda)
     print(df_perplexity[i, ])
   }
   names(ls_lda) <- v_k
@@ -26,7 +26,7 @@ p_perplexity <- df_perplexity %>%
   theme_classic()
 
 lda <- ls_lda[["8"]]
-topics <- tidy(lda, matrix = "beta")
+topics <- tidytext::tidy(lda, matrix = "beta")
 
 topic_names <- data.frame(
   topic = 1:8,
@@ -52,14 +52,14 @@ top_terms <- topics %>%
   left_join(topic_names, by = "topic")
 
 p_topic <- top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
+  mutate(term = tidytext::reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~name, scales = "free") +
-  scale_y_reordered() +
+  tidytext::scale_y_reordered() +
   theme_minimal()
 
-gamma <- tidy(lda, matrix = "gamma")
+gamma <- tidytext::tidy(lda, matrix = "gamma")
 
 df_text_class <- gamma %>%
   arrange(document) %>%

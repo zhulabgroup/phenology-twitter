@@ -1,7 +1,7 @@
 df_tw_st <- df_tweet %>%
   left_join(df_geo_all %>% select(user_location, state), by = "user_location") %>%
   filter(!is.na(state)) %>%
-  mutate(date = date(paste(year, month, day, sep = "-"))) %>%
+  mutate(date = lubridate::date(paste(year, month, day, sep = "-"))) %>%
   mutate(
     year = lubridate::year(date),
     doy = lubridate::yday(date)

@@ -7,8 +7,8 @@ df_tw_ts <- df_tweet %>%
   #          parse_date_time("BdY HMS")
   # ) %>%
   # mutate(date = lubridate::date(time)) %>%
-  mutate(date = date(paste(year, month, day, sep = "-"))) %>%
-  mutate(doy = yday(date)) %>%
+  mutate(date = lubridate::date(paste(year, month, day, sep = "-"))) %>%
+  mutate(doy = lubridate::yday(date)) %>%
   group_by(year, doy, date, type) %>%
   summarise(count = n()) %>%
   ungroup() %>%
@@ -16,10 +16,10 @@ df_tw_ts <- df_tweet %>%
   gather(key = "type", value = "count", -year, -doy, -date) %>%
   mutate(year = as.integer(year)) %>%
   right_join(
-    data.frame(date = seq(date("2012-01-01"), date("2022-12-31"), by = "day")) %>%
+    data.frame(date = seq(lubridate::date("2012-01-01"), lubridate::date("2022-12-31"), by = "day")) %>%
       mutate(
-        doy = yday(date),
-        year = year(date)
+        doy = lubridate::yday(date),
+        year = lubridate::year(date)
       ),
     by = c("year", "doy", "date")
   ) # add NA to gap dates

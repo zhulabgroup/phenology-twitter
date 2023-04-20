@@ -35,7 +35,7 @@ get_ideo <- function(v_user) {
       out2 <- tryCatch(
         {
           set.seed(1)
-          suppressMessages(score1 <- estimateIdeology(user, friends, method = "MLE") %>% summary() %>% `[`(2, 1))
+          suppressMessages(score1 <- tweetscores::estimateIdeology(user, friends, method = "MLE") %>% summary() %>% `[`(2, 1))
         },
         error = function(e) {
           return(999)
@@ -49,7 +49,7 @@ get_ideo <- function(v_user) {
       out3 <- tryCatch(
         {
           set.seed(1)
-          suppressMessages(score2 <- estimateIdeology2(user, friends))
+          suppressMessages(score2 <- tweetscores::estimateIdeology2(user, friends))
         },
         error = function(e) {
           return(999)

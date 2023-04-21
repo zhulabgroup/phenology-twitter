@@ -43,8 +43,8 @@ p_senti_all_fine <- ggplot(data = df_senti_all %>% filter(!sentiment %in% c("pos
 df_senti_topic <- df_sentiment %>%
   gather(key = "sentiment", value = "score", -text, -topic) %>%
   group_by(sentiment, topic) %>%
-  left_join(df_senti_all %>% rename(mean = score), by = "sentiment") %>%
-  mutate(score = score - mean) %>%
+  # left_join(df_senti_all %>% rename(mean = score), by = "sentiment") %>%
+  # mutate(score = score - mean) %>%
   summarise(score = mean(score)) %>%
   left_join(topic_names, by = "topic")
 
@@ -52,7 +52,7 @@ p_senti_topic <- ggplot(data = df_senti_topic %>% filter(sentiment %in% c("posit
   geom_bar(aes(x = sentiment, y = score, fill = sentiment), stat = "identity") +
   theme(legend.position = "none") +
   theme_classic() +
-  facet_wrap(. ~ name, ncol = 2, scales = "free_y") +
+  facet_wrap(. ~ name, ncol = 3) +
   guides(fill = "none") +
   geom_hline(yintercept = 0)
 
@@ -60,8 +60,9 @@ p_senti_topic_fine <- ggplot(data = df_senti_topic %>% filter(!sentiment %in% c(
   geom_bar(aes(x = sentiment, y = score, fill = sentiment), stat = "identity") +
   theme(legend.position = "none") +
   theme_classic() +
-  facet_wrap(. ~ name, ncol = 2, scales = "free_y") +
+  facet_wrap(. ~ name, ncol = 3) +
   guides(fill = "none") +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.8, hjust = 1)) +
   geom_hline(yintercept = 0)
 
 # ggplot(data = df_sentiment %>%

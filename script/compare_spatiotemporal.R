@@ -1,10 +1,10 @@
 df_doy_state <- bind_rows(
   df_nab_doy_state,
-  df_tw_doy_state
+  df_tw_doy_state # %>% filter(state %in% v_state_top)
 ) %>%
   mutate(metric = factor(metric, levels = c("sos", "eos")))
 
-p_doy_state <- ggplot(df_doy_state %>% filter(state %in% v_state_top)) +
+p_doy_state <- ggplot(df_doy_state) +
   geom_point(aes(x = lat, y = doy, col = group, group = group)) +
   geom_smooth(aes(x = lat, y = doy, col = group, group = group), method = "lm") +
   ggpubr::stat_cor(aes(
@@ -13,6 +13,17 @@ p_doy_state <- ggplot(df_doy_state %>% filter(state %in% v_state_top)) +
   )) +
   theme_classic() +
   facet_wrap(. ~ metric)
+
+p_doy_corr <- ggplot(df_doy_state %>%
+  spread(key = "group", value = "doy")) +
+  geom_point(aes(x = pollen, y = tweet, group = metric)) +
+  geom_smooth(aes(x = pollen, y = tweet, group = metric), method = "lm") +
+  ggpubr::stat_cor(aes(
+    x = pollen, y = tweet, group = metric,
+    label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+  )) +
+  theme_classic() +
+  facet_wrap(. ~ metric, scales = "free")
 
 # animation
 df_stmap <- map_data("state") %>%

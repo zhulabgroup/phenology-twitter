@@ -18,7 +18,8 @@ source("script/setup.R")
 
 ```{r}
 source("script/combine_csv.R")
-df_compiled %>% head()
+set.seed(1)
+df_compiled %>% select( text) %>% sample_n(10)
 ```
 
 # Reverse geo-encoder
@@ -100,6 +101,7 @@ source("script/nab_spatiotemporal.R")
 p_nab_pheno_state
 source("script/compare_spatiotemporal.R")
 p_doy_state
+p_doy_corr
 ```
 
 ## Content analysis
@@ -114,8 +116,14 @@ p_keyword_cloud
 source("script/topic_modeling.R")
 p_perplexity
 p_topic
+set.seed(1)
 df_text_class %>%
   filter(topic == 3) %>%
+  select(text) %>% 
+  sample_n(20)
+df_text_class %>%
+  filter(topic == 5) %>%
+  select(text) %>% 
   sample_n(20)
 ```
 

@@ -70,4 +70,5 @@ df_text_class <- gamma %>%
   mutate(document = as.integer(document)) %>%
   arrange(document) %>%
   mutate(text = text_all) %>%
+  # filter(gamma >=0.8) %>%
   select(-document, -gamma)

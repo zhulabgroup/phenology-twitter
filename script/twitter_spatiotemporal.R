@@ -44,6 +44,7 @@ df_state_coord <- map_data("state") %>%
 
 df_tw_doy_state <- bind_rows(
   df_tw_st %>%
+    filter(doy > 40, doy <= 180) %>%
     group_by(state) %>%
     arrange(state, doy) %>%
     drop_na() %>%
@@ -58,6 +59,7 @@ df_tw_doy_state <- bind_rows(
       metric = "sos"
     ),
   df_tw_st %>%
+    filter(doy > 40, doy <= 180) %>%
     group_by(state) %>%
     arrange(state, doy) %>%
     drop_na() %>%

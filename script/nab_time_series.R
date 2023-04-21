@@ -36,7 +36,7 @@ p_nab_ts <- ggplot(df_nab_filter) +
     breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2),
     labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
   ) +
-  facet_wrap(. ~ id, scales = "free_y") +
+  facet_wrap(. ~ location, scales = "free_y") +
   theme_classic() +
   scale_color_viridis_c()
 

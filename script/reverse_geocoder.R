@@ -1,5 +1,11 @@
 df_compiled <- read_rds(.path$dat_compile)
 
+location_percent <- df_compiled %>%
+  arrange(user_id, user_location) %>%
+  distinct(user_id, user_location) %>%
+  summarize(user_num = n(), loc_user_num = sum(!is.na(user_location))) %>%
+  mutate(perc = loc_user_num / user_num)
+
 if (!file.exists(.path$dat_geo)) {
   df_geo <- df_compiled %>%
     select(user_location) %>%

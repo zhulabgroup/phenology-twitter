@@ -1,13 +1,13 @@
 df_clean <- read_rds(.path$dat_process)
 
-df_text_distinct <- df_clean %>%
-  distinct(clean_text) %>%
-  rename(text = clean_text)
+# df_text_distinct <- df_clean %>%
+#   distinct(clean_text) %>%
+#   rename(text = clean_text)
 
-text_all <- df_text_distinct %>% pull(text)
+text_all <- df_clean %>% pull(text)
 
-text_train <- text_all %>% sample(0.8 * length(text_all) %>% round())
-text_valid <- setdiff(text_all, text_train)
+# text_train <- text_all %>% sample(0.8 * length(text_all) %>% round())
+# text_valid <- setdiff(text_all, text_train)
 
 text2dtm <- function(text) {
   docs <- tm::Corpus(tm::VectorSource(text))
@@ -19,7 +19,7 @@ text2dtm <- function(text) {
   docs <- tm::tm_map(docs, tm::removeWords, tm::stopwords("english"))
   # Remove your own stop word
   # specify your stopwords as a character vector
-  docs <- tm::tm_map(docs, tm::removeWords, c("like", "just", "can", "amp"))
+  docs <- tm::tm_map(docs, tm::removeWords, c("amp"))
   # Remove punctuations
   docs <- tm::tm_map(docs, tm::removePunctuation)
   # Eliminate extra white spaces
@@ -45,6 +45,10 @@ df_text_tidy <- tidytext::tidy(dtm_all) %>%
 # d <- data.frame(word = names(v),freq=v)
 # head(d, 10)
 
+allerg_perc <- df_clean %>%
+  filter(str_detect(text, "allerg")) %>%
+  nrow() / df_clean %>% nrow()
+
 # bar chart of most frequent words found in the tweets
 p_keyword_bar <- df_text_tidy %>%
   head(15) %>%
@@ -57,7 +61,7 @@ p_keyword_bar <- df_text_tidy %>%
   theme_minimal()
 
 if (FALSE) {
-  hw <- wordcloud2::wordcloud2(df_text_tidy %>% head(1000))
+  hw <- wordcloud2::wordcloud2(df_text_tidy %>% head(500))
   htmlwidgets::saveWidget(hw, str_c(.path$fig_wc, "wordcloud.html"), selfcontained = F)
   webshot::webshot(str_c(.path$fig_wc, "wordcloud.html"), str_c(.path$fig_wc, "wordcloud.png"),
     vwidth = 1000, vheight = 600, delay = 10

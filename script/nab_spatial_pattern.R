@@ -18,11 +18,11 @@ p_nab_map_station <- ggplot() +
   coord_map("bonne", lat0 = 50) +
   scale_fill_viridis_c(option = "magma", direction = -1)
 
-df_nab_state_name <- df_nab_meta %>%
-  distinct(location) %>%
+df_nab_state_name <- df_nab_station %>%
+  filter(country == "US") %>%
+  filter(state != "PR") %>%
+  distinct(id, state) %>%
   rowwise() %>%
-  mutate(state = str_split(location, pattern = ",", simplify = T)[2]) %>%
-  mutate(state = str_replace_all(state, " ", "")) %>%
   mutate(state = state.name[match(state, state.abb)]) %>%
   mutate(state = tolower(state))
 

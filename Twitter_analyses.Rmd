@@ -21,6 +21,7 @@ source("script/combine_csv.R")
 set.seed(1)
 df_compiled %>% select( text) %>% sample_n(10)
 ```
+Total number of tweets in the dataset `r df_compiled %>% nrow()`.
 
 # Reverse geo-encoder
 
@@ -33,6 +34,8 @@ df_geo_all %>%
 ```
 
 Among `r df_compiled_geo %>% nrow()` records, `r df_compiled_geo %>% filter(us_state == "us") %>% nrow()` can be identified to be within the US, and `r df_compiled_geo %>% filter(!is.na(state)) %>% nrow()` can be identified to US states.
+
+Percentage of users with location info is `r location_percent$perc`.
 
 # Filter and clean data
 Filtering criteria:
@@ -64,6 +67,11 @@ p_tw_ts
 p_tw_ts_fs
 p_user_num
 ```
+
+`r df_ts_sum %>% filter(window=="spring") %>% pull(sum) / df_ts_sum %>% filter(window=="all") %>% pull(sum)` percent in the spring pollen window. 
+Annual peak ranges from `r peak_range$count_adj %>% min()` to `r peak_range$count_adj %>% max()`.
+Highest peak of `r highest_peak$count_adj` (`r highest_peak$count` before adjustment) on `r highest_peak$date`.
+
 # NAB time series
 ```{r}
 source("script/nab_data.R")
@@ -111,6 +119,10 @@ source("script/frequent_words.R")
 p_keyword_bar
 p_keyword_cloud
 ```
+
+The top 15 words were `r df_text_tidy %>% head(15) %>% pull(word)`.
+`r allerg_perc` of tweets containing "allerg".
+
 # Topic modeling
 ```{r}
 source("script/topic_modeling.R")

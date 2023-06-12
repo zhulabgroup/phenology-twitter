@@ -65,6 +65,8 @@ df_nab_meta <- df_nab_full %>%
   arrange(desc(n)) %>%
   mutate(site = NA)
 
+df_nab_meta %>% nrow()
+
 p_nab_map <- ggplot() +
   geom_polygon(data = map_data("state"), aes(x = long, y = lat, group = group), fill = "white") +
   geom_path(data = map_data("state"), aes(x = long, y = lat, group = group), color = "grey50", alpha = 0.5, linewidth = 0.2) +

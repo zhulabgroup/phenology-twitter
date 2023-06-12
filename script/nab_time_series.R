@@ -1,16 +1,10 @@
-df_nab_full <- read_rds(str_c(.path$dat_nab, "dat_pollen.rds"))
+# df_nab_full <- read_rds(str_c(.path$dat_nab, "dat_pollen.rds"))
 
 df_nab_ts <- df_nab_full %>%
-  filter(
-    date >= lubridate::date("2012-01-01"),
-    date <= lubridate::date("2022-12-31")
-  ) %>%
-  filter(family == "Total") %>%
   mutate(
     doy = lubridate::yday(date),
     year = lubridate::year(date)
-  ) %>%
-  select(-family, -genus, -taxa)
+  )
 
 # Select for station and year with sample size
 # df_nab_ts %>%
@@ -36,12 +30,12 @@ p_nab_ts <- ggplot(df_nab_filter) +
     breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2),
     labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
   ) +
-  facet_wrap(. ~ location, scales = "free_y") +
+  facet_wrap(. ~ id, scales = "free_y") +
   theme_classic() +
   scale_color_viridis_c()
 
 df_nab_ts_fs <- df_nab_filter %>%
-  group_by(lat, lon, station, location, id) %>%
+  group_by(id, state) %>%
   mutate(count_in = zoo::na.approx(count, date, na.rm = F, maxgap = 14)) %>%
   mutate(count_sm = whitfun(count_in, 50)) %>%
   mutate(doy = lubridate::yday(date)) %>%
@@ -54,15 +48,15 @@ p_nab_ts_fs <- ggplot(df_nab_ts_fs) +
     breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2),
     labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
   ) +
-  facet_wrap(. ~ location, scales = "free_y") +
+  facet_wrap(. ~ id, scales = "free_y") +
   theme_classic() +
   scale_color_viridis_c()
 
 
 # Average it out
-df_nab_ts_sd <- df_nab_ts_fs %>%
+df_nab_ts_sd <- df_nab_filter %>%
   mutate(count_tr = count^(1 / 2)) %>%
-  group_by(lat, lon, station, location, id) %>%
+  group_by(id) %>%
   mutate(count_sd = count_tr / quantile(count_tr, 0.95, na.rm = T)) %>%
   ungroup() %>%
   group_by(year, doy, date) %>%
@@ -73,7 +67,7 @@ df_nab_ts_sd <- df_nab_ts_fs %>%
   ungroup() %>%
   filter(n >= 5) %>%
   mutate(count_in = zoo::na.approx(count_mn, date, na.rm = F, maxgap = 14)) %>%
-  mutate(count_sm = whitfun(count_in, 50)) %>%
+  mutate(count_sm = whitfun(count_in, 30)) %>%
   mutate(pollen = count_sm)
 
 p_nab_ts_sd <- ggplot(df_nab_ts_sd) +

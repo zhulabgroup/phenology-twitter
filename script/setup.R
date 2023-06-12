@@ -11,6 +11,8 @@ library(scales)
 library(ptw)
 library(nlme)
 library(patchwork)
+library(gridExtra)
+library(ggpubr)
 library(syuzhet)
 library(tm)
 library(tidytext)
@@ -45,5 +47,6 @@ category <- "pollen"
   dat_topic = "data/processed/topic/",
   dat_other = "data/processed/",
   dat_coding = "data/processed/coding/",
-  dat_ideo = "./data/processed/ideology/"
+  dat_ideo = "./data/processed/ideology/",
+  fig = "figures/"
 )

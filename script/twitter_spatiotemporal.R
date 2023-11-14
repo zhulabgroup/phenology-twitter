@@ -61,7 +61,7 @@ df_tw_doy_state <- bind_rows(
     group_by(state) %>%
     arrange(state, doy) %>%
     drop_na() %>%
-    filter(cumsum(count_mn) >= 0.25 * sum(count_mn)) %>%
+    filter(cumsum(tweet) >= 0.25 * sum(tweet)) %>%
     arrange(doy) %>%
     slice(1) %>%
     ungroup() %>%
@@ -76,7 +76,7 @@ df_tw_doy_state <- bind_rows(
     group_by(state) %>%
     arrange(state, doy) %>%
     drop_na() %>%
-    filter(cumsum(count_mn) <= 0.75 * sum(count_mn)) %>%
+    filter(cumsum(tweet) <= 0.75 * sum(tweet)) %>%
     arrange(desc(doy)) %>%
     slice(1) %>%
     ungroup() %>%
@@ -85,6 +85,21 @@ df_tw_doy_state <- bind_rows(
     mutate(
       group = "tweet",
       metric = "eos"
+    ),
+  df_tw_st %>%
+    filter(doy > 40, doy <= 180) %>%
+    group_by(state) %>%
+    arrange(state, doy) %>%
+    drop_na() %>%
+    filter(cumsum(tweet) <= 0.5 * sum(tweet)) %>%
+    arrange(desc(doy)) %>%
+    slice(1) %>%
+    ungroup() %>%
+    select(state, doy) %>%
+    left_join(df_state_coord, by = "state") %>%
+    mutate(
+      group = "tweet",
+      metric = "mos"
     ),
   df_tw_st %>%
     filter(doy > 40, doy <= 180) %>%
@@ -114,15 +129,17 @@ p_tw_pheno_state <- ggplot() +
     data = df_tw_st,
     aes(x = doy, y = tweet, col = state, group = state)
   ) +
+  geom_vline(xintercept = 40)+
+  geom_vline(xintercept = 180)+
   geom_vline(
     data = df_tw_doy_state,
     aes(xintercept = doy, col = state)
   ) +
-  scale_y_continuous(
-    trans = scales::sqrt_trans(),
-    breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2),
-    labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
-  ) +
-  facet_wrap(. ~ state) +
+  # scale_y_continuous(
+  #   trans = scales::sqrt_trans(),
+  #   breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2),
+  #   labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+  # ) +
+  facet_wrap(. ~ state, scales = "free_y") +
   guides(col = "none") +
   theme_classic()

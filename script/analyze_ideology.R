@@ -1,35 +1,23 @@
-df_group_sample <- ls_df_group_sample[["pollen-climate"]]$sample
-df_group_coding <- read_csv(str_c(.path$dat_coding, "pollen-climate", "_labeled.csv"))
-sci_perc <- df_group_sample %>%
-  select(user = user_screen_name, clean_text) %>%
-  right_join(df_group_coding,
-    by = "clean_text"
-  ) %>%
-  select(-clean_text) %>%
-  filter(
-    pollen_phenology == 1,
-    climate_change == 1,
-    causation == 1,
-    agreement == 1
-  ) %>%
-  group_by(science) %>%
-  summarise(n = n())
-
-
-v_group_new <- c(v_group, "pollen-original")
+v_group_new <- c(v_group, "pollen-temperature-original",  "pollen-climate-original")
 ls_df_group_sample_size <- ls_df_group <- vector(mode = "list")
 for (group in v_group_new) {
-  if (group != "pollen-original") {
-    df_group_sample <- ls_df_group_sample[[group]]$sample
-    total_sample_size <- ls_df_group_sample[[group]]$sample_size
-    df_group_coding <- read_csv(str_c(.path$dat_coding, group, "_labeled.csv"))
-    df_group_ideo <- read_rds(str_c(.path$dat_ideo, group, ".rds")) %>%
+  if (group == "pollen-temperature-original") {
+    df_group_sample <- ls_df_group_sample[["pollen-temperature"]]$sample
+    total_sample_size <- ls_df_group_sample[["pollen-temperature"]]$sample_size
+    df_group_coding <- read_csv(str_c(.path$dat_coding, "pollen-temperature", "_labeled.csv"))
+    df_group_ideo <- read_rds(str_c(.path$dat_ideo, "pollen-temperature", ".rds")) %>%
       select(user, ideology = ideology2)
-  } else {
+  } else if (group == "pollen-climate-original") {
     df_group_sample <- ls_df_group_sample[["pollen-climate"]]$sample
     total_sample_size <- ls_df_group_sample[["pollen-climate"]]$sample_size
     df_group_coding <- read_csv(str_c(.path$dat_coding, "pollen-climate", "_labeled.csv"))
     df_group_ideo <- read_rds(str_c(.path$dat_ideo, "pollen-climate", ".rds")) %>%
+      select(user, ideology = ideology2)
+  } else {
+    df_group_sample <- ls_df_group_sample[[group]]$sample
+    total_sample_size <- ls_df_group_sample[[group]]$sample_size
+    df_group_coding <- read_csv(str_c(.path$dat_coding, group, "_labeled.csv"))
+    df_group_ideo <- read_rds(str_c(.path$dat_ideo, group, ".rds")) %>%
       select(user, ideology = ideology2)
   }
 
@@ -37,12 +25,21 @@ for (group in v_group_new) {
     df_group_valid <- df_group_coding %>%
       filter(pollen_phenology == 1)
   }
-  if (group == "pollen-weather") {
+  if (group == "pollen-temperature") {
     df_group_valid <- df_group_coding %>%
       filter(
         pollen_phenology == 1,
-        weather_change == 1,
+        temperature_change == 1,
         correlation == 1
+      )
+  }
+  if (group == "pollen-temperature-original") {
+    df_group_valid <- df_group_coding %>%
+      filter(
+        pollen_phenology == 1,
+        temperature_change == 1,
+        correlation == 1,
+        science == 0
       )
   }
   if (group == "pollen-climate") {
@@ -54,7 +51,7 @@ for (group in v_group_new) {
         agreement == 1
       )
   }
-  if (group == "pollen-original") {
+  if (group == "pollen-climate-original") {
     df_group_valid <- df_group_coding %>%
       filter(
         pollen_phenology == 1,
@@ -97,8 +94,8 @@ df_group_sample_size <- bind_rows(ls_df_group_sample_size) %>%
   mutate(total_valid = valid / rho)
 
 # cond prob summary
-cond_prob_weather <- df_group_sample_size %>%
-  filter(group == "pollen-weather") %>%
+cond_prob_temperature <- df_group_sample_size %>%
+  filter(group == "pollen-temperature") %>%
   pull(total_valid) / df_group_sample_size %>%
     filter(group == "pollen") %>%
     pull(total_valid)
@@ -130,7 +127,7 @@ df_ideo_summ <- df_ideo %>%
   ) %>%
   select(-total)
 
-p_ideo_density <- ggplot(df_ideo %>% filter(group != "pollen-original")) +
+p_ideo_density <- ggplot(df_ideo %>% filter(!str_detect(group, "original"))) +
   geom_density(aes(x = ideology, fill = group, col = group), alpha = 0.5, bw = 0.2) +
   theme_classic() +
   scale_fill_viridis_d() +
@@ -143,6 +140,7 @@ p_ideo_density <- ggplot(df_ideo %>% filter(group != "pollen-original")) +
   )
 
 df_ideo_bin <- df_ideo %>%
+  # filter(!str_detect(group, "original")) %>%
   mutate(bin = cut(ideology, breaks = seq(-2, 2, by = 0.5))) %>%
   group_by(group, bin) %>%
   summarise(n = n()) %>%
@@ -167,30 +165,30 @@ df_ideo_freq_ratio <- df_ideo_bin %>%
   spread(key = "group", value = "n") %>%
   mutate(
     `climate | pollen` = `pollen-climate` / pollen,
-    `weather | pollen` = `pollen-weather` / pollen,
-    `original | pollen` = `pollen-original` / pollen,
-    `climate | weather` = `pollen-climate` / `pollen-weather`,
-    `original | climate` = `pollen-original` / `pollen-climate`
+    `temperature | pollen` = `pollen-temperature` / pollen,
+    `climate | temperature` = `pollen-climate` / `pollen-temperature`,
+    `temperature-original | pollen` = `pollen-temperature-original` / `pollen`,
+    `climate-original | pollen` = `pollen-climate-original` / `pollen`
   ) %>%
-  select(-pollen, -`pollen-climate`, -`pollen-weather`) %>%
+  select(-pollen, -`pollen-climate`, -`pollen-temperature`, -`pollen-temperature-original`, -`pollen-climate-original`) %>%
   gather(key = "group", value = "ratio", -bin) %>%
   mutate(bin = factor(bin, levels = bin_level)) %>%
   mutate(group = factor(group,
     levels = c(
-      "weather | pollen",
+      "temperature | pollen",
       "climate | pollen",
-      "original | pollen",
-      "climate | weather",
-      "original | climate"
+      "climate | temperature",
+      "temperature-original | pollen",
+      "climate-original | pollen"
     )
   ))
 
 
-plot_ideo_cond <- function(v_cond) {
+plot_ideo_cond <- function(df_ideo_freq_ratio, v_cond) {
   p <- ggplot(df_ideo_freq_ratio %>%
     filter(group %in% v_cond)) +
     geom_point(aes(x = bin, y = ratio, group = group, col = group)) +
-    geom_smooth(aes(x = bin, y = ratio, group = group, col = group), method = "lm", se = F) +
+    geom_smooth(aes(x = bin, y = ratio, group = group, col = group), method = MASS::rlm, se = T) +
     ggpubr::stat_cor(
       aes(
         x = bin, y = ratio, group = group, col = group,
@@ -201,7 +199,10 @@ plot_ideo_cond <- function(v_cond) {
       digits = 3,
       show.legend = F
     ) +
-    scale_color_manual(values = c("darkolivegreen4", "dark green")) +
+    scale_color_manual(values = c("temperature | pollen"="darkolivegreen4", 
+                                  "climate | pollen"= "dark green" ,
+                                  "temperature-original | pollen"="coral", 
+                                  "climate-original | pollen"= "dark orange" )) +
     theme_classic() +
     labs(
       x = "Bin of ideology score",
@@ -211,19 +212,20 @@ plot_ideo_cond <- function(v_cond) {
 
   return(p)
 }
+
 p_ideo_cond1 <- plot_ideo_cond(
+  df_ideo_freq_ratio,
   c(
-    "weather | pollen",
-    "climate | pollen" # ,
-    # "original | pollen"
+    "temperature | pollen",
+    "climate | pollen"
   )
 )
 
 p_ideo_cond2 <- plot_ideo_cond(
+  df_ideo_freq_ratio,
   c(
-    "weather | pollen",
-    "climate | weather",
-    "original | climate"
+    "temperature-original | pollen",
+    "climate-original | pollen"
   )
 )
 

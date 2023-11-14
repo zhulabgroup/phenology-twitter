@@ -1,5 +1,5 @@
 # select samples in three subsets
-v_group <- c("pollen", "pollen-weather", "pollen-climate")
+v_group <- c("pollen"   ,   "pollen-temperature", "pollen-climate")
 
 f_sample <- str_c(.path$dat_other, "group_sample_list.rds")
 if (!file.exists(f_sample)) {
@@ -11,7 +11,7 @@ if (!file.exists(f_sample)) {
     if (group == "pollen") {
       df_group <- df_clean
     }
-    if (group == "pollen-weather") {
+    if (group == "pollen-temperature") {
       T_keywords <- c("warm", "warmer", "warming", "hot", "hotter")
       T_key_regex <- regex(paste("\\b(?i)", T_keywords, "\\b", sep = "", collapse = "|"))
 
@@ -50,12 +50,12 @@ if (!file.exists(f_sample)) {
           science = ""
         )
     }
-    if (group == "pollen-weather") {
+    if (group == "pollen-temperature") {
       df_group_forlabel <- df_group_distinct %>%
         select(user_screen_name, user_description, text, clean_text, type) %>%
         mutate(
           pollen_phenology = "",
-          weather_change = "",
+          temperature_change = "",
           causation = "",
           agreement = "",
           sentiment = "",
@@ -84,5 +84,35 @@ if (!file.exists(f_sample)) {
 
 ls_df_group_labeled <- vector(mode = "list")
 for (group in v_group) {
-  df_group_labeled <- read_csv(str_c(.path$dat_coding, group, "_labeled.csv")) %>% as_tibble()
+  ls_df_group_labeled[[group]] <- read_csv(str_c(.path$dat_coding, group, "_labeled.csv")) %>% as_tibble()
 }
+
+# read labeled results
+
+
+ls_df_group_valid <- vector(mode = "list")
+for (group in v_group) {
+  if (group == "pollen") {
+    ls_df_group_valid[[group]] <- read_csv(str_c(.path$dat_coding,group, "_labeled.csv")) %>%
+      filter(
+        pollen_phenology == 1
+      )
+  }
+  if (group == "pollen-temperature") {
+    ls_df_group_valid[[group]] <- read_csv(str_c(.path$dat_coding, group, "_labeled.csv")) %>%
+      filter(
+        pollen_phenology == 1,
+        weather_change == 1,
+        correlation == 1
+      )
+  }
+  if (group == "pollen-climate") {
+    ls_df_group_valid[[group]] <- read_csv(str_c(.path$dat_coding,group, "_labeled.csv")) %>%
+      filter(
+        pollen_phenology == 1,
+        climate_change == 1,
+        causation == 1
+      )
+  }
+}
+ls_df_group_valid

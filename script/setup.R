@@ -25,13 +25,16 @@ library(topicmodels)
 library(tweetscores)
 library(network)
 library(sna)
-library(ggnetwork)
+# library(ggnetwork)
+library(ggalluvial)
+
 
 pacman::p_unload("all")
 library(tidyverse)
 library(patchwork)
 library(doSNOW)
 library(parallel)
+library(ggalluvial)
 
 category <- "pollen"
 
@@ -47,6 +50,8 @@ category <- "pollen"
   dat_topic = "data/processed/topic/",
   dat_other = "data/processed/",
   dat_coding = "data/processed/coding/",
-  dat_ideo = "./data/processed/ideology/",
+  dat_ideo = "data/processed/ideology/",
+  dat_user_type = "data/processed/user_type/",
+  dat_network = "data/processed/network/",
   fig = "figures/"
 )

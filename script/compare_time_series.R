@@ -45,19 +45,19 @@ p_ts_corr <- ggplot(df_ts_compare) +
   ) +
   scale_color_viridis_c()
 
-p_ts_corr_window <- ggplot(df_ts_compare %>%
-  filter(doy > 40, doy <= 180)) +
-  geom_point(aes(x = pollen, y = tweet, col = year, group = year), alpha = 0.25) +
-  geom_smooth(aes(x = pollen, y = tweet, col = year, group = year), method = "lm", se = F) +
-  theme_classic() +
-  ggpubr::stat_cor(
-    aes(
-      x = pollen, y = tweet,
-      label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
-    ),
-    digits = 3
-  ) +
-  scale_color_viridis_c()
+# p_ts_corr_window <- ggplot(df_ts_compare %>%
+#   filter(doy > 40, doy <= 180)) +
+#   geom_point(aes(x = pollen, y = tweet, col = year, group = year), alpha = 0.25) +
+#   geom_smooth(aes(x = pollen, y = tweet, col = year, group = year), method = "lm", se = F) +
+#   theme_classic() +
+#   ggpubr::stat_cor(
+#     aes(
+#       x = pollen, y = tweet,
+#       label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+#     ),
+#     digits = 3
+#   ) +
+#   scale_color_viridis_c()
 
 df_ts_compare_peak <- df_ts_compare %>%
   group_by(year) %>%
@@ -90,55 +90,55 @@ p_ts_peak_corr <- ggplot(df_ts_compare_peak) +
     y = "Peak of natural pollen phenology curve"
   )
 
-v_year <- 2012:2022 %>% setdiff(2017)
-ls_df_interannual <- vector(mode = "list")
-for (y in v_year) {
-  df_ts_subset <- df_ts_compare %>%
-    filter(year == y) %>%
-    filter(doy > 40, doy <= 180)
-
-  df_tw_ts <- df_ts_subset %>%
-    select(doy, tweet) %>%
-    drop_na(tweet)
-  tweet_peak <- pracma::findpeaks(df_tw_ts$tweet, minpeakheight = 0.5, npeaks = 1)
-
-  df_nab_ts <- df_ts_subset %>%
-    select(doy, pollen) %>%
-    drop_na(pollen)
-  pollen_peak <- pracma::findpeaks(df_nab_ts$pollen, minpeakheight = 0.5, npeaks = 1)
-
-  ls_df_interannual[[y]] <- bind_rows(
-    df_tw_ts %>%
-      slice(tweet_peak[2]) %>%
-      rename(pos = doy, peak = tweet) %>%
-      gather(key = "metric") %>%
-      mutate(data = "tweet"),
-    df_nab_ts %>%
-      slice(pollen_peak[2]) %>%
-      rename(pos = doy, peak = pollen) %>%
-      gather(key = "metric") %>%
-      mutate(data = "pollen")
-  ) %>%
-    mutate(year = y)
-}
-df_interannual <- bind_rows(ls_df_interannual) %>%
-  spread(key = "data", value = "value")
-
-p_ts_peak_corr <- ggplot(df_interannual %>% filter(metric == "pos")) +
-  geom_point(aes(x = tweet, y = pollen)) +
-  ggrepel::geom_label_repel(aes(x = tweet, y = pollen, label = year)) +
-  geom_smooth(aes(x = tweet, y = pollen), method = "lm", se = F) +
-  ggpubr::stat_cor(
-    aes(
-      x = tweet, y = pollen,
-      label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
-    ),
-    digits = 3
-  ) +
-  theme_classic() +
-  labs(
-    x = "Peak of Twitter pollen phenology curve",
-    y = "Peak of natural pollen phenology curve"
-  )
-
-MASS::rlm(pollen ~ tweet, data = df_ts_compare_annual)
+# v_year <- 2012:2022 %>% setdiff(2017)
+# ls_df_interannual <- vector(mode = "list")
+# for (y in v_year) {
+#   df_ts_subset <- df_ts_compare %>%
+#     filter(year == y) %>%
+#     filter(doy > 40, doy <= 180)
+# 
+#   df_tw_ts <- df_ts_subset %>%
+#     select(doy, tweet) %>%
+#     drop_na(tweet)
+#   tweet_peak <- pracma::findpeaks(df_tw_ts$tweet, minpeakheight = 0.5, npeaks = 1)
+# 
+#   df_nab_ts <- df_ts_subset %>%
+#     select(doy, pollen) %>%
+#     drop_na(pollen)
+#   pollen_peak <- pracma::findpeaks(df_nab_ts$pollen, minpeakheight = 0.5, npeaks = 1)
+# 
+#   ls_df_interannual[[y]] <- bind_rows(
+#     df_tw_ts %>%
+#       slice(tweet_peak[2]) %>%
+#       rename(pos = doy, peak = tweet) %>%
+#       gather(key = "metric") %>%
+#       mutate(data = "tweet"),
+#     df_nab_ts %>%
+#       slice(pollen_peak[2]) %>%
+#       rename(pos = doy, peak = pollen) %>%
+#       gather(key = "metric") %>%
+#       mutate(data = "pollen")
+#   ) %>%
+#     mutate(year = y)
+# }
+# df_interannual <- bind_rows(ls_df_interannual) %>%
+#   spread(key = "data", value = "value")
+# 
+# p_ts_peak_corr <- ggplot(df_interannual %>% filter(metric == "pos")) +
+#   geom_point(aes(x = tweet, y = pollen)) +
+#   ggrepel::geom_label_repel(aes(x = tweet, y = pollen, label = year)) +
+#   geom_smooth(aes(x = tweet, y = pollen), method = "lm", se = F) +
+#   ggpubr::stat_cor(
+#     aes(
+#       x = tweet, y = pollen,
+#       label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+#     ),
+#     digits = 3
+#   ) +
+#   theme_classic() +
+#   labs(
+#     x = "Peak of Twitter pollen phenology curve",
+#     y = "Peak of natural pollen phenology curve"
+#   )
+# 
+# MASS::rlm(pollen ~ tweet, data = df_ts_compare_annual)

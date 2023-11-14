@@ -160,6 +160,15 @@ p_ideo_cond1
 p_ideo_cond2
 ```
 
+`r df_group_sample_size %>% filter(group == "pollen-weather-original") %>% pull(valid)` out of `r df_group_sample_size %>% filter(group == "pollen-weather") %>% pull(valid)` is orginal in pollen-weather group. `r df_group_sample_size %>% filter(group == "pollen-climate-original") %>% pull(valid)` out of `r df_group_sample_size %>% filter(group == "pollen-climate") %>% pull(valid)` is orginal in pollen-climate group.
+
+
+# Bipartite network
+```{r}
+source("script/make_network.R")
+source("script/user_type.R")
+```
+
 # Echo chamber
 
 ```{r}

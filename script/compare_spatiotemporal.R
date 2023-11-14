@@ -2,7 +2,7 @@ df_doy_state <- bind_rows(
   df_nab_doy_state,
   df_tw_doy_state # %>% filter(state %in% v_state_top)
 ) %>%
-  mutate(metric = factor(metric, levels = c("pos", "sos", "eos")))
+  mutate(metric = factor(metric, levels = c("sos","mos",  "eos", "pos")))
 
 p_doy_state <- ggplot(df_doy_state) +
   geom_point(aes(x = lat, y = doy, col = group, group = group)) +
@@ -14,16 +14,16 @@ p_doy_state <- ggplot(df_doy_state) +
   theme_classic() +
   facet_wrap(. ~ metric)
 
-df_doy_state %>%
-  filter(metric == "sos") %>%
-  spread(key = "group", value = "doy") %>%
-  drop_na(pollen, tweet) %>%
-  nrow()
-df_doy_state %>%
-  filter(metric == "eos") %>%
-  spread(key = "group", value = "doy") %>%
-  drop_na(pollen, tweet) %>%
-  nrow()
+# df_doy_state %>%
+#   filter(metric == "sos") %>%
+#   spread(key = "group", value = "doy") %>%
+#   drop_na(pollen, tweet) %>%
+#   nrow()
+# df_doy_state %>%
+#   filter(metric == "eos") %>%
+#   spread(key = "group", value = "doy") %>%
+#   drop_na(pollen, tweet) %>%
+#   nrow()
 
 p_doy_corr <- ggplot(df_doy_state %>%
   mutate(state_label = case_when(
@@ -35,21 +35,22 @@ p_doy_corr <- ggplot(df_doy_state %>%
   )) %>%
   filter(metric != "pos") %>%
   mutate(metric = factor(metric,
-    levels = c("sos", "pos", "eos"),
+    levels = c("sos", "mos", "eos"),
     labels = c(
       "start of season",
-      "peak of season",
+      "middle of season",
       "end of season"
     )
   )) %>%
   spread(key = "group", value = "doy")) +
   geom_point(aes(x = tweet, y = pollen, group = metric, col = metric)) +
-  ggrepel::geom_label_repel(aes(x = tweet, y = pollen, group = metric, col = metric, label = state_label), fill = NA) +
+  # ggrepel::geom_label_repel(aes(x = tweet, y = pollen, group = metric, col = metric, label = state_label), fill = NA) +
   geom_smooth(aes(x = tweet, y = pollen, group = metric, col = metric), method = "lm", se = F) +
   ggpubr::stat_cor(aes(
-    x = tweet, y = pollen, group = metric, col = metric,
+    x = tweet, y = pollen, #group = metric, col = metric,
     label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
   )) +
+  geom_abline(intercept = 0, slope = 1, col= "blue") +
   scale_color_manual(values = c("dark orange", "dark red", "purple")) +
   theme_classic() +
   labs(
@@ -57,7 +58,9 @@ p_doy_corr <- ggplot(df_doy_state %>%
     y = "Day of year\n(from natural pollen phenology)",
     col = "Phenological metric"
   ) +
-  theme(legend.position = "bottom")
+  theme(legend.position = "bottom") + 
+  coord_equal()+
+  facet_wrap(.~metric)
 
 p_peak_corr <- ggplot(df_doy_state %>%
   filter(metric == "pos") %>%
@@ -71,11 +74,13 @@ p_peak_corr <- ggplot(df_doy_state %>%
     ),
     digits = 3
   ) +
+  geom_abline(intercept = 0, slope = 1, col= "blue") +
   theme_classic() +
   labs(
-    x = "Peak day of year\n(from natural pollen phenology)",
-    y = "Peak day of year\n(from Twitter pollen phenology)"
-  )
+    y = "Peak day of year\n(from natural pollen phenology)",
+    x = "Peak day of year\n(from Twitter pollen phenology)"
+  )+
+  coord_equal()
 
 # animation
 df_stmap <- map_data("state") %>%

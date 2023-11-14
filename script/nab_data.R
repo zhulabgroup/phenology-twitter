@@ -1,60 +1,29 @@
-if (!file.exists(str_c(.path$dat_nab, "dat_pollen.rds"))) {
-  df_nab <- read_rds(str_c(.path$dat_nab, "dat_20230327.rds"))
-  df_taxa <- read_rds(str_c(.path$dat_nab, "taxonomy.rds"))
+if (!file.exists(str_c(.path$dat_nab, "dat_pollen_total.rds"))) {
+  df_count <- tidynab::load_data(request = "2023") %>% 
+      tidynab::parse_data() 
+  df_taxa <- as.tibble(read.csv(system.file("extdata/2023-04-25", "renew_taxonomy.csv", package = "tidynab")))
+  df_geo <- tidynab::geolocate_stations()
 
-  df_o <- df_nab %>%
-    rename(taxa_raw = taxa) %>%
-    left_join(df_taxa, by = "taxa_raw") %>%
-    rename(taxa = taxa_clean) %>%
-    mutate(kingdom = case_when(
-      taxa_raw == "Total Pollen Count" ~ "Viridiplantae",
-      TRUE ~ kingdom
-    )) %>%
-    mutate(family = case_when(
-      taxa_raw == "Total Pollen Count" ~ "Total_o",
-      TRUE ~ family
-    )) %>%
-    mutate(genus = case_when(
-      taxa_raw == "Total Pollen Count" ~ "Total_o",
-      TRUE ~ genus
-    )) %>%
+  df_pollen_total <- df_count %>%
+    left_join(df_taxa, by = c("taxa"="taxa_raw")) %>%
     filter(kingdom == "Viridiplantae") %>%
-    group_by(date, lat, lon, station, location, id, family, genus, taxa) %>%
-    summarise(count = sum(count)) %>%
-    ungroup()
-
-  # Not all sites have "total pollen count"
-  df_add <- df_o %>%
-    filter(family != "Total_o" | is.na(family)) %>%
-    group_by(date, lat, lon, station, location, id) %>%
+    group_by(date, stationid) %>%
     summarise(count = sum(count, na.rm = T)) %>%
     ungroup() %>%
-    mutate(
-      family = "Total",
-      genus = "Total"
-    )
+    left_join(df_geo, by= c("stationid"="id"))
 
-  # left_join(
-  #   df_o %>%
-  #     filter(family == "Total_o") %>%
-  #     select(date, location, station, total_o = count),
-  #   df_add %>%
-  #     select(date, location, station, total = count),
-  #   by = c("date", "location", "station")
-  # ) %>%
-  #   ggplot() +
-  #   geom_point(aes(x = total_o, y = total)) +
-  #   theme_classic()
-
-  df_nab_full <- bind_rows(df_o, df_add)
-  write_rds(df_nab_full, str_c(.path$dat_nab, "dat_pollen.rds"))
+  write_rds(df_pollen_total, str_c(.path$dat_nab, "dat_pollen_total.rds"))
 } else {
-  df_nab_full <- read_rds(str_c(.path$dat_nab, "dat_pollen.rds"))
+  df_pollen_total <- read_rds(str_c(.path$dat_nab, "dat_pollen_total.rds"))
 }
 
-df_nab_meta <- df_nab_full %>%
+df_nab<- df_pollen_total %>% 
+  filter(country == "US") %>% 
+  filter(!state %in% c("AK", "PR"))
+
+df_nab_meta <- df_nab %>%
   drop_na(count) %>%
-  group_by(station, location, lat, lon, id) %>%
+  group_by(stationid, name, city, state, lat, lon, country) %>%
   summarise(
     mindate = min(date),
     maxdate = max(date),

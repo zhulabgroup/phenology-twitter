@@ -10,7 +10,7 @@ df_net_ideo <- read_rds(str_c(.path$dat_ideo, "pollen-climate", ".rds")) %>%
 
 df_net <- df_net_sample %>%
   select(user = user_screen_name, clean_text, text, type) %>%
-  right_join(df_net_valid %>% select(clean_text),
+  inner_join(df_net_valid %>% select(clean_text),
     by = "clean_text"
   ) %>%
   left_join(

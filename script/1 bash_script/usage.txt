@@ -1,2 +1,0 @@
-sbatch --export=CAT=pollen,YEA=2022,MON=01,STA=01 --job-name=pollen-2022-01 decahose-filter.sh
-sbatch --export=CAT=pollen,YEA=2021,MON=01,STA=01 --job-name=pollen-2021-01 decahose-filter-scratch.sh

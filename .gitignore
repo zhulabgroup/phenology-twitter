@@ -1,1 +1,7 @@
 .Rproj.user
+/doc/
+/Meta/
+utils/twitter-user-geocoder/*.csv
+utils/twitter-user-geocoder/*.txt
+utils/twitter-user-geocoder/*.json
+

@@ -1,0 +1,87 @@
+---
+title: "Vignette"
+output: rmarkdown::html_vignette
+fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_knit$set(root.dir = here::here()) # knit from project directory
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  dpi = 300,
+  cache = T,
+  comment = "#>",
+  warning = F,
+  message = F,
+  out.width = "100%",
+  fig.align = "left"
+)
+```
+
+```{r setup}
+library(phenotwitter)
+theme_set(ggthemes::theme_few())
+```
+
+## Preprocess data
+# combine csv files into rds
+
+```{r, eval = F}
+path_compile <- read_tweet_csv()
+```
+
+```{r}
+df_compiled <- read_tweet( geo = F)
+set.seed(1)
+```
+Total number of tweets in the dataset `r df_compiled %>% nrow()`.
+
+# Reverse geo-encoder
+
+```{r}
+df_summ_geo <- summarize_geo_info (df_tweet = df_compiled)
+```
+Percentage of users with location info is `r df_summ_geo$perc`.
+
+
+```{r, eval = F}
+path_geo <- tidy_geo(df_tweet = df_compiled)
+```
+
+```{r}
+df_compiled_geo <- read_tweet(geo = T)
+```
+
+Among `r df_compiled_geo %>% nrow()` records, `r df_compiled_geo %>% filter(us_state == "us") %>% nrow()` can be identified to be within the US, and `r df_compiled_geo %>% filter(!is.na(state)) %>% nrow()` can be identified to US states.
+
+# Filter and clean data
+Filtering criteria:
+- no duplicated unique id
+- posted in English
+- have the exact keyword "pollen" in the cleaned text (not a part of a longer word, not in tags, not in urls)
+- identified to be within the US
+Cleaning steps (original text still kept):
+- remove line breaks
+- remove url
+- remove tag
+- remove "RT" at the start
+- remove non-words
+- convert character encoding from UTF-8 to ASCII
+
+```{r, eval = F}
+df_tweet <- tidy_tweet_clean(df_compiled_geo = df_compiled_geo)
+usethis::use_data(df_tweet)
+```
+
+```{r}
+df_tweet %>% select(text) %>% sample_n(10)
+```
+
+```{r}
+plot_user_type(df_tweet = df_tweet)
+```
+

@@ -1,0 +1,83 @@
+---
+title: "02 Phenology"
+output: rmarkdown::html_vignette
+fig_caption: yes
+vignette: >
+  %\VignetteIndexEntry{Vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_knit$set(root.dir = here::here()) # knit from project directory
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  dpi = 300,
+  cache = T,
+  comment = "#>",
+  warning = F,
+  message = F,
+  out.width = "100%",
+  fig.align = "left"
+)
+```
+
+```{r setup}
+library(phenotwitter)
+theme_set(ggthemes::theme_few())
+```
+# Twitter time series
+
+```{r}
+df_user_num <- read_user_num()
+p_user_num <- plot_user_num(df_user_num = df_user_num, save = T)
+```
+
+```{r}
+df_ts_tw <- tidy_time_series(df_tweet = df_tweet, df_user_num = df_user_num, option = "twitter")
+usethis::use_data(df_ts_tw)
+plot_time_series(df_ts_tw = df_ts_tw, option = "twitter",save = T)
+summ_time_series_twitter(df_ts_tw = df_ts_tw)
+```
+
+Processing steps
+- Square-root transformation
+- Standardize to approximately between 0 and 1
+- Whittaker smoothing with gap filling
+
+```{r}
+df_ts_tw_proc <- tidy_time_series(df_tweet = df_tweet, df_user_num = df_user_num, option = "twitter", process = T)
+plot_time_series(df_ts_tw = df_ts_tw_proc,option = "twitter",process = T, save = T)
+```
+
+# NAB time series
+```{r, eval = F}
+df_nab <- read_nab()
+usethis::use_data(df_nab)
+```
+
+```{r}
+plot_nab_map (df_nab = df_nab, save = T)
+```
+
+```{r}
+df_ts_nab <- tidy_time_series(df_nab = df_nab, option = "nab")
+plot_time_series(df_ts_nab = df_ts_nab, option = "nab",save = T)
+```
+
+Processing steps
+- Square-root transformation
+- Standardize to approximately between 0 and 1 for each station
+- Average over all stations
+- Whittaker smoothing with gap filling
+
+```{r}
+df_ts_nab_proc <- tidy_time_series(df_nab = df_nab, option = "nab", process = T)
+plot_time_series(df_ts_nab = df_ts_nab_proc,option = "nab",process = T, save = T)
+```
+
+# Compare time series
+```{r}
+p_ts_compare <- plot_time_series(df_ts_tw = df_ts_tw_proc,df_ts_nab = df_ts_nab_proc,option = "compare", save = T)
+p_ts_compare
+```

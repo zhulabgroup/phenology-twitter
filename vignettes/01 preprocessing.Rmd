@@ -1,5 +1,5 @@
 ---
-title: "Vignette"
+title: "01 Preprocessing"
 output: rmarkdown::html_vignette
 fig_caption: yes
 vignette: >
@@ -27,8 +27,7 @@ library(phenotwitter)
 theme_set(ggthemes::theme_few())
 ```
 
-## Preprocess data
-# combine csv files into rds
+# Combine csv files into rds
 
 ```{r, eval = F}
 path_compile <- read_tweet_csv()
@@ -81,7 +80,9 @@ usethis::use_data(df_tweet)
 df_tweet %>% select(text) %>% sample_n(10)
 ```
 
+There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were used in the following analyses.
+
 ```{r}
-plot_user_type(df_tweet = df_tweet)
+plot_tweet_type(df_tweet = df_tweet, save = T)
 ```
 

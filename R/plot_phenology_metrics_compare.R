@@ -21,19 +21,19 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
     )) %>%
     ggplot() +
     geom_point(aes(x = lat, y = doy, col = data, group = data)) +
-    geom_smooth(aes(x = lat, y = doy, col = data, group = data), method = "lm") +
+    geom_smooth(aes(x = lat, y = doy, col = data, group = data), method = "lm", se = F) +
     scale_color_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
     ggpubr::stat_cor(
       aes(
         x = lat, y = doy, col = data, group = data,
-        label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+        label = paste(after_stat(r.label), after_stat(p.label), sep = "~`,`~")
       ),
       p.accuracy = 0.001,
       digits = 3
     ) +
     labs(
-      x = "Latitude of state",
-      y = "Time of spring pollen peak",
+      x = "Latitude of state (° N)",
+      y = "Time of spring pollen peak\n(day of year)",
       col = "Data source"
     ) +
     theme(legend.position = "bottom")

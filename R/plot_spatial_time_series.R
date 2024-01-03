@@ -1,7 +1,7 @@
 #' @export
 plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_metric_tw = NULL, df_st_metric_nab = NULL, metricoi = "mos", save = F, option = "twitter") {
   if (option == "compare") {
-    df_st_compare <- left_join(df_st_tw %>% select(state, state_name, doy, tweet = count_sm),
+    df_st_compare <- full_join(df_st_tw %>% select(state, state_name, doy, tweet = count_sm),
       df_st_nab %>% select(state, state_name, doy, pollen = count_sm),
       by = c("state", "state_name", "doy")
     ) %>%
@@ -14,7 +14,7 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
         )
       ))
 
-    df_st_metric_compare <- left_join(df_st_metric_tw %>% select(state, state_name, metric, tweet = doy),
+    df_st_metric_compare <- full_join(df_st_metric_tw %>% select(state, state_name, metric, tweet = doy),
       df_st_metric_nab %>% select(state, state_name, metric, pollen = doy),
       by = c("state", "state_name", "metric")
     ) %>%
@@ -49,7 +49,11 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
         linetype = "dotted"
       ) +
       scale_color_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
-      scale_fill_viridis_c(direction = -1) +
+      scale_fill_viridis_c(
+        direction = -1,
+        na.value = "white",
+        breaks = seq(90, 130, by = 20)
+      ) +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
         breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
@@ -67,9 +71,10 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       labs(
         x = NULL,
         y = "Pollen phenology (standardized value)",
-        fill = "Time of spring peak\n(day of year)",
+        fill = str_c("Time of spring pollen peak\nderived from \n", "Twitter", " pollen phenology\n(day of year)"),
         col = "Data source"
       ) +
+      guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title.hjust = 0)) +
       theme(
         strip.background = element_rect(linetype = "blank", fill = NA),
         strip.text = element_text(
@@ -127,7 +132,11 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
         #                 option == "nab" ~"dark orange")
         linetype = "dotted"
       ) +
-      scale_fill_viridis_c(direction = -1) +
+      scale_fill_viridis_c(
+        direction = -1,
+        na.value = "white",
+        breaks = seq(90, 130, by = 20)
+      ) +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
         breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
@@ -145,11 +154,19 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       labs(
         x = NULL,
         y = case_when(
-          option == "twitter" ~ "Tweet count (standardized)",
-          option == "nab" ~ "Pollen concentration (standardized)"
+          option == "twitter" ~ "Twitter pollen phenology (standardized value)",
+          option == "nab" ~ "Natural pollen phenology (standardized value)"
         ),
-        fill = "Time of spring peak\n(day of year)"
+        fill = str_c(
+          "Time of spring pollen peak\nderived from \n",
+          case_when(
+            option == "twitter" ~ "Twitter",
+            option == "nab" ~ "natural"
+          ),
+          " pollen phenology\n(day of year)"
+        )
       ) +
+      guides(fill = guide_colourbar(direction = "horizontal", title.position = "top", title.hjust = 0)) +
       theme(
         strip.background = element_rect(linetype = "blank", fill = NA),
         strip.text = element_text(

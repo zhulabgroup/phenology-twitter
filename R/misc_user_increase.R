@@ -26,7 +26,7 @@ plot_user_num <- function(df_user_num, save) {
     scale_fill_manual(values = c("recorded" = "black", "inferred" = "white")) +
     geom_line(aes(x = year, y = user_num)) +
     scale_x_continuous(breaks = seq(2012, 2022, by = 2)) +
-    theme_classic() +
+    # theme_classic() +
     labs(
       x = "Year",
       y = "US Twitter user number (million)",

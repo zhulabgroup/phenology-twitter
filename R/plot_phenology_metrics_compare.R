@@ -1,0 +1,91 @@
+#' @export
+plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, metricoi = "mos", save = F) {
+  df_st_metric_compare <- full_join(
+    df_st_metric_tw %>%
+      filter(metric == metricoi) %>%
+      select(state, state_name, lon, lat, tweet = doy),
+    df_st_metric_nab %>%
+      filter(metric == metricoi) %>%
+      select(state, state_name, lon, lat, pollen = doy),
+    by = c("state", "state_name", "lon", "lat")
+  )
+
+  p_st_gradient <- df_st_metric_compare %>%
+    gather(key = "data", value = "doy", -state, -state_name, -lon, -lat) %>%
+    mutate(data = factor(data,
+      levels = c("tweet", "pollen"),
+      labels = c(
+        "tweet count",
+        "pollen concentration"
+      )
+    )) %>%
+    ggplot() +
+    geom_point(aes(x = lat, y = doy, col = data, group = data)) +
+    geom_smooth(aes(x = lat, y = doy, col = data, group = data), method = "lm") +
+    scale_color_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
+    ggpubr::stat_cor(
+      aes(
+        x = lat, y = doy, col = data, group = data,
+        label = paste(after_stat(rr.label), after_stat(p.label), sep = "~`,`~")
+      ),
+      p.accuracy = 0.001,
+      digits = 3
+    ) +
+    labs(
+      x = "Latitude of state",
+      y = "Time of spring pollen peak",
+      col = "Data source"
+    ) +
+    theme(legend.position = "bottom")
+
+  v_state_label <- c("Texas", "Georgia", "North Carolina", "California", "New York")
+  p_st_corr <- df_st_metric_compare %>%
+    drop_na() %>%
+    mutate(state_label = case_when(
+      state_name %in% v_state_label ~ state_name
+    )) %>%
+    ggplot() +
+    geom_point(aes(x = pollen, y = tweet)) +
+    ggrepel::geom_label_repel(aes(x = pollen, y = tweet, label = state_label), fill = NA) +
+    geom_smooth(aes(x = pollen, y = tweet), method = "lm", se = F) +
+    ggpubr::stat_cor(
+      aes(
+        x = pollen, y = tweet,
+        label = paste(after_stat(r.label), after_stat(p.label), sep = "~`,`~")
+      ),
+      p.accuracy = 0.001,
+      digits = 3
+    ) +
+    labs(
+      x = "Time of spring pollen peak\nderived from natural pollen phenology\n(day of year)",
+      y = "Time of spring pollen peak\nderived from Twitter pollen phenology\n(day of year)",
+      col = "Phenological metric"
+    )
+
+  if (save) {
+    ggsave(
+      plot = p_st_gradient,
+      filename = "alldata/output/figures/supp/phenology_metrics_gradient.png",
+      width = 6,
+      height = 6,
+      device = png,
+      type = "cairo"
+    )
+
+    ggsave(
+      plot = p_st_corr,
+      filename = "alldata/output/figures/supp/phenology_metrics_corr.png",
+      width = 6,
+      height = 6,
+      device = png,
+      type = "cairo"
+    )
+  }
+
+  out <- list(
+    gradient = p_st_gradient,
+    corr = p_st_corr
+  )
+
+  return(out)
+}

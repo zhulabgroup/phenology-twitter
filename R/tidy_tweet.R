@@ -1,5 +1,5 @@
 #' @export
-tidy_tweet_clean <- function(df_compiled_geo, path_process = "alldata/processed/processed.rds") {
+tidy_tweet_clean <- function(df_compiled_geo, path_process = "alldata/intermediate/processed.rds") {
   # remove repeated id
   df_filter <- df_compiled_geo %>%
     distinct(id, .keep_all = T)

@@ -1,6 +1,6 @@
 #' @export
 read_tweet_csv <- function(path_query = "alldata/query/pollen/") {
-  path_compile <- "alldata/processed/compiled.rds"
+  path_compile <- "alldata/intermediate/compiled.rds"
 
   v_year <- str_c(path_query, "CSV/") %>% list.files()
 
@@ -81,7 +81,7 @@ read_tweet_csv <- function(path_query = "alldata/query/pollen/") {
 }
 
 #' @export
-read_tweet <- function(path = "alldata/processed/compiled.rds", path_geo = "alldata/processed/geocoding.rds", geo = F) {
+read_tweet <- function(path = "alldata/intermediate/compiled.rds", path_geo = "alldata/intermediate/geocoding.rds", geo = F) {
   df_compiled <- read_rds(path)
 
   if (geo) {

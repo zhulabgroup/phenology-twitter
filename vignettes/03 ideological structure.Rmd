@@ -26,3 +26,85 @@ knitr::opts_chunk$set(
 library(phenotwitter)
 theme_set(ggthemes::theme_few())
 ```
+
+# Define subgroups of users
+```{r}
+p_subgroup_venn <- plot_subgroup_venn(save = T)
+p_subgroup_venn
+```
+
+# sample and code tweets in subgroups
+```{r, eval = F}
+ls_df_group_sample <- tidy_subgroup_sample(df_tweet = df_tweet, writecsv = T)
+usethis::use_data(ls_df_group_sample)
+# manually label sampled tweets here
+ls_df_group_label <- read_subgroup_label(valid = F)
+ls_df_group_valid <- read_subgroup_label(valid = T)
+usethis::use_data(ls_df_group_valid)
+```
+
+```{r}
+set.seed(1)
+ls_df_group_valid$pollen %>%
+  sample_n(3) %>%
+  pull(text)
+ls_df_group_valid$`pollen-temperature` %>%
+  sample_n(3) %>%
+  pull(text)
+ls_df_group_valid$`pollen-climate` %>%
+  sample_n(3) %>%
+  pull(text)
+```
+
+# get ideology of users in subgroups
+```{r, eval = F}
+calc_user_ideology(ls_df_group_sample)
+ls_df_user_ideology <- read_user_ideology()
+usethis::use_data(ls_df_user_ideology)
+```
+
+```{r}
+ls_df_group_ideology <- calc_group_ideology(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, ls_df_user_ideology = ls_df_user_ideology)
+usethis::use_data(ls_df_group_ideology)
+```
+
+```{r}
+df_group_sample_size <- ls_df_group_ideology$sample_size
+df_group_sample_size
+summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "temperature")
+summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "climate")
+```
+
+# ideological structure in attribution
+```{r}
+df_group_ideology <- ls_df_group_ideology$sample
+df_summ_group_ideology <- summ_group_ideology(df_group_ideology)
+df_summ_group_ideology
+```
+
+```{r}
+p_ideology_density <- plot_ideology_density(
+  df_group_ideology = df_group_ideology,
+  df_summ_group_ideology = df_summ_group_ideology,
+  save = T
+)
+```
+
+```{r}
+df_ideo_cond_prob <- calc_ideo_cond_prob(df_group_ideology = df_group_ideology, df_group_sample_size = df_group_sample_size)
+p_ideo_cond_prob_temperature <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "temperature", save = T)
+p_ideo_cond_prob_temperature
+p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "climate", save = T)
+p_ideo_cond_prob_climate
+```
+
+
+```{r}
+plot_ideology_structure(
+  p_subgroup_venn = p_subgroup_venn,
+  p_ideology_density = p_ideology_density,
+  p_ideo_cond_prob_temperature = p_ideo_cond_prob_temperature,
+  p_ideo_cond_prob_climate = p_ideo_cond_prob_climate,
+  save = T
+)
+```

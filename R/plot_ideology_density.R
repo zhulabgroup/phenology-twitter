@@ -22,7 +22,6 @@ plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, sav
         )),
       aes(x = x, y = 0.1, label = label)
     ) +
-    theme_classic() +
     labs(
       x = "(Liberal)    Ideology score    (Conservative)",
       y = "Probability density",

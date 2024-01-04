@@ -37,6 +37,7 @@ plot_subgroup_venn <- function(save = F) {
   return(p)
 }
 
+#' @export
 misc_subset <- function(forlabel = F, oneline = F) {
   if (!forlabel) {
     v_group <- c("pollen", "pollen-temperature", "pollen-climate")
@@ -44,9 +45,9 @@ misc_subset <- function(forlabel = F, oneline = F) {
 
   if (forlabel) {
     if (!oneline) {
-      v_group <- c("discuss\npollen phenology", "attribute to\ntemperature", "attribute to\nclimate change")
+      v_group <- c("discuss\npollen phenology", "attribute to\ntemperature change", "attribute to\nclimate change")
     } else {
-      v_group <- c("discuss pollen phenology", "attribute to temperature", "attribute to climate change")
+      v_group <- c("discuss pollen phenology", "attribute to temperature change", "attribute to climate change")
     }
   }
   return(v_group)

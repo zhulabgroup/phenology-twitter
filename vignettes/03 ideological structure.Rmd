@@ -98,7 +98,6 @@ p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond
 p_ideo_cond_prob_climate
 ```
 
-
 ```{r}
 plot_ideology_structure(
   p_subgroup_venn = p_subgroup_venn,

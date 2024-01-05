@@ -50,6 +50,9 @@ df_ts_tw_proc <- calc_time_series(df_tweet = df_tweet, df_user_num = df_user_num
 usethis::use_data(df_ts_tw_proc, overwrite = T)
 plot_time_series(df_ts_tw = df_ts_tw_proc, option = "twitter", process = T, save = T)
 ```
+```{r}
+summ_ts_spring(df_ts_tw = df_ts_tw)
+```
 
 # NAB time series
 ```{r, eval = F}

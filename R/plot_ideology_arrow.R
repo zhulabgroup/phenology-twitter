@@ -9,7 +9,7 @@ plot_ideology_arrow <- function(option = 1) {
         arrow = arrow(
           length = unit(0.3, "npc"),
           type = "closed" # Describes arrow head (open or closed)
-        ), size = 2
+        ), linewidth = 2
       ) +
       scale_color_manual(values = c("dark green", "dark blue", "dark orange")) +
       facet_wrap(. ~ group, ncol = 1) +
@@ -26,11 +26,11 @@ plot_ideology_arrow <- function(option = 1) {
           type = "closed" # Describes arrow head (open or closed)
         ),
         colour = "dark blue",
-        size = 1.2,
+        linewidth = 1.2,
         angle = 90,
         curvature = -0.5
       ) +
-      geom_label(aes(x = 0.2, y = 3), label = "c", col = "dark blue") +
+      geom_label(aes(x = 0.18, y = 3), label = "c", col = "dark blue") +
       geom_curve(
         aes(x = 0, y = 4.5, xend = 0, yend = -0.5),
         arrow = arrow(
@@ -42,8 +42,8 @@ plot_ideology_arrow <- function(option = 1) {
         angle = 90,
         curvature = -0.5
       ) +
-      geom_label(aes(x = 0.5, y = 2), label = "d", col = "dark orange") +
-      xlim(0, 1) +
+      geom_label(aes(x = 0.4, y = 2), label = "d", col = "dark orange") +
+      xlim(0, 0.5) +
       ylim(-1, 5) +
       theme_void()
   }

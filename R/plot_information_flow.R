@@ -14,14 +14,14 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
       drop_na() %>%
       mutate(freq = count / sum(count)) %>%
       select(-count) %>%
-      mutate(source_type = from) %>%
-      gather(key = "end", value = "type", -interaction, -freq, -source_type) %>%
-      mutate(end = factor(end, levels = c("from", "to") %>% rev(), labels = c("source", "destination") %>% rev())) %>%
+      mutate(from_type = from) %>%
+      gather(key = "end", value = "type", -interaction, -freq, -from_type) %>%
+      mutate(end = factor(end, levels = c("from", "to") %>% rev(), labels = c("from", "to") %>% rev())) %>%
       mutate(type = factor(type, levels = c("media", "expert", "other\nindividual", "other\norganization") %>% rev())) %>%
-      mutate(source_type = factor(source_type, levels = c("media", "expert", "other\nindividual", "other\norganization") %>% rev())) %>%
+      mutate(from_type = factor(from_type, levels = c("media", "expert", "other\nindividual", "other\norganization") %>% rev())) %>%
       mutate(
-        type_label1 = case_when(end == "source" ~ type),
-        type_label2 = case_when(end == "destination" ~ type)
+        type_label1 = case_when(end == "from" ~ type),
+        type_label2 = case_when(end == "to" ~ type)
       ) %>%
       select(interaction, everything())
 
@@ -33,7 +33,7 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
     #   select(end, type, freq_label)
 
     p <- ggplot(df_sankey, aes(y = end, id = interaction, split = type, value = freq)) +
-      ggforce::geom_parallel_sets(aes(fill = source_type), alpha = 0.3, axis.width = 0.1) +
+      ggforce::geom_parallel_sets(aes(fill = from_type), alpha = 0.3, axis.width = 0.1) +
       ggforce::geom_parallel_sets_axes(aes(fill = type), axis.width = 0.1) +
       ggforce::geom_parallel_sets_labels(aes(
         label = after_stat(str_c(label, (value * 100) %>% round() %>% str_c("%"), sep = "\n")),
@@ -50,8 +50,9 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
         fill = "none",
         col = "none"
       ) +
-      theme(axis.text.y = element_text(angle = 90)) +
+      theme(axis.text.y = element_text(angle = 0)) +
       theme(strip.text = element_text(size = 12)) +
+      scale_x_continuous(expand = expansion(mult = c(.02, .06))) +
       ggtitle(case_when(
         group == misc_subset(forlabel = F)[1] ~ str_c("a. ", misc_subset(forlabel = T, oneline = T)[1]),
         group == misc_subset(forlabel = F)[2] ~ str_c("b. ", misc_subset(forlabel = T, oneline = T)[2]),

@@ -34,7 +34,7 @@ path_compile <- read_tweet_csv()
 ```
 
 ```{r}
-df_compiled <- read_tweet( geo = F)
+df_compiled <- read_tweet(geo = F)
 set.seed(1)
 ```
 Total number of tweets in the dataset `r df_compiled %>% nrow()`.
@@ -42,7 +42,7 @@ Total number of tweets in the dataset `r df_compiled %>% nrow()`.
 # Reverse geo-encoder
 
 ```{r}
-df_summ_geo <- summarize_geo_info (df_tweet = df_compiled)
+df_summ_geo <- summarize_geo_info(df_tweet = df_compiled)
 ```
 Percentage of users with location info is `r df_summ_geo$perc`.
 
@@ -77,7 +77,10 @@ usethis::use_data(df_tweet)
 ```
 
 ```{r}
-df_tweet %>% select(text) %>% sample_n(10)
+df_tweet %>%
+  select(text) %>%
+  sample_n(10)
+summ_tweet(df_tweet = df_tweet)
 ```
 
 There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were used in the following analyses.
@@ -85,4 +88,3 @@ There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were u
 ```{r}
 plot_tweet_type(df_tweet = df_tweet, save = T)
 ```
-

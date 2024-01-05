@@ -8,18 +8,26 @@ plot_subgroup_venn <- function(save = F) {
     ggforce::geom_circle(aes(x0 = 0, y0 = 0, r = 1), fill = "dark orange", col = "dark orange", alpha = 0.5) +
     geom_label(
       data = data.frame(
-        group = misc_subset(forlabel = T) %>% factor(levels = misc_subset(forlabel = T)),
-        x = c(1.5, 1.5, 1.5),
+        group = misc_subset(forlabel = T, oneline = T) %>%
+          factor(levels = misc_subset(forlabel = T, oneline = T)),
+        message = c(
+          "this pollen is killing me",
+          "pollen level is high and\nwarm weather will make it worse",
+          "global warming could make\nyour pollen allergies a lot worse"
+        ),
+        x = c(9, 9, 9),
         y = c(4, 2, 0)
       ),
-      aes(x = x, y = y, label = group, col = group)
+      aes(x = x, y = y, label = str_c(group, ":\ne.g., \"", message, "\""), col = group),
+      hjust = 1
     ) +
     scale_color_manual(values = c(
       "dark green",
       "dark blue",
       "dark orange"
     )) +
-    coord_fixed() +
+    coord_fixed(ratio = 2) +
+    xlim(-3, 9) +
     guides(col = "none") +
     scale_fill_identity() +
     theme_void()

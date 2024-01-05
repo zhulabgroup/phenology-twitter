@@ -1,5 +1,9 @@
 #' @export
 plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, save = F) {
+  # df_sample_size <- df_group_ideology %>%
+  #   group_by(group) %>%
+  #   summarise(n = n())
+
   p_ideo_density <- df_group_ideology %>%
     mutate(group = factor(group,
       levels = misc_subset(forlabel = F),

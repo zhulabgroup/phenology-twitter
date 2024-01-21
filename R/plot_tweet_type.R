@@ -1,12 +1,13 @@
 #' @export
-plot_tweet_type <- function(df_tweet) {
+plot_tweet_type <- function(df_tweet, save = F) {
   p_tweet_type <- df_tweet %>%
     group_by(type) %>%
     summarise(count = n()) %>%
+    mutate(count_format = format(count, big.mark = ",")) %>%
     ungroup() %>%
     ggplot(aes(x = "", y = count, fill = type)) +
     geom_col(color = "black") +
-    geom_label(aes(label = paste0(type, ": ", count)),
+    geom_label(aes(label = paste0(type, ": ", count_format)),
       position = position_stack(vjust = 0.5),
       col = "white"
     ) +

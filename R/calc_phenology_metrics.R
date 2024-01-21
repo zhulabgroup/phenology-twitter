@@ -1,5 +1,12 @@
 #' @export
 calc_spatiotemporal_metrics <- function(df_st = NULL) {
+  df_centroids <- tigris::states() %>%
+    sf::st_centroid() %>%
+    bind_cols(st_coordinates(.)) %>%
+    data.frame() %>%
+    select(state = NAME, lon = X, lat = Y) %>%
+    mutate(state = state %>% tolower())
+
   df_st_metric <- bind_rows(
     df_st %>%
       filter(doy >= 32, doy <= 151) %>%
@@ -55,12 +62,7 @@ calc_spatiotemporal_metrics <- function(df_st = NULL) {
   ) %>%
     mutate(state_name_lower = tolower(state_name)) %>%
     left_join(
-      map_data("state") %>% # state coordinate
-        group_by(state = region) %>%
-        summarise(
-          lon = mean(long),
-          lat = mean(lat)
-        ),
+      df_centroids,
       by = c("state_name_lower" = "state")
     ) %>%
     select(-state_name_lower)

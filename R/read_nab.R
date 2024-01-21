@@ -39,7 +39,7 @@ plot_nab_map <- function(df_nab, save = F) {
     geom_polygon(data = map_data("state"), aes(x = long, y = lat, group = group), fill = "white") +
     geom_path(data = map_data("state"), aes(x = long, y = lat, group = group), color = "grey50", alpha = 0.5, linewidth = 0.2) +
     theme_void() +
-    geom_point(data = df_nab_meta, aes(x = lon, y = lat), pch = 10, color = "black", cex = 3) +
+    geom_point(data = df_nab_meta, aes(x = lon, y = lat), pch = 1, color = "black", cex = 3) +
     coord_map("bonne", lat0 = 50)
 
   if (save) {

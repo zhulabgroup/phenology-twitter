@@ -1,12 +1,12 @@
 #' @export
 plot_phenology_compare <- function(p_ts_compare, p_st_compare, p_metrics_compare, save = F) {
   p <- p_ts_compare$line +
-    p_st_compare +
     p_metrics_compare$gradient +
+    p_st_compare +
     plot_layout(design = "
-                AAC
-                BBB
-                BBB
+                AAB
+                CCC
+                CCC
                 ") +
     plot_annotation(
       tag_levels = "a",

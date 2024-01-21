@@ -38,8 +38,8 @@ plot_user_num <- function(df_user_num, save) {
     ggsave(
       plot = p_user_num,
       filename = "alldata/output/figures/supp/user_increase.png",
-      width = 8,
-      height = 8 * 0.618,
+      width = 6,
+      height = 6 * 0.618,
       device = png,
       type = "cairo"
     )

@@ -47,6 +47,10 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     mutate(
       doy_min = 32,
       doy_max = 151
+    ) %>%
+    mutate(
+      date_min = doy_min + lubridate::date(str_c(year, "-01-01")) - 1,
+      date_max = doy_max + lubridate::date(str_c(year, "-01-01")) - 1,
     )
 
   p_ts_lines <- df_ts_compare %>%
@@ -63,18 +67,18 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     geom_rect(
       data = df_spring,
       aes(
-        xmin = doy_min + lubridate::date("2023-01-01") - 1,
-        xmax = doy_max + lubridate::date("2023-01-01") - 1
+        xmin = date_min,
+        xmax = date_max
       ),
       ymin = -Inf, ymax = Inf,
       fill = "gray", alpha = 0.2
     ) +
-    geom_line(aes(x = doy + lubridate::date("2023-01-01") - 1, y = value, col = data, group = data)) +
+    geom_line(aes(x = date, y = value, col = data, group = data)) +
     scale_color_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
     scale_x_date(
       date_labels = "%b",
-      breaks = seq(lubridate::date("2023-01-01"),
-        lubridate::date("2023-12-31"),
+      breaks = seq(lubridate::date("2012-01-01"),
+        lubridate::date("2022-12-31") + 1,
         by = "3 months"
       )
     ) +
@@ -89,7 +93,8 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
       y = "Pollen phenology (standardized value)",
       col = "Data source"
     ) +
-    theme(legend.position = "bottom")
+    theme(legend.position = "bottom") +
+    theme(axis.text = element_text(size = 8))
 
   p_ts_corr <- ggplot(df_ts_compare) +
     geom_point(aes(x = pollen, y = tweet, col = year, group = year), alpha = 0.25) +
@@ -152,7 +157,7 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
       filter(str_detect(city, cityoi)) %>%
       ggplot() +
       geom_point(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count, group = year, col = year), alpha = 0.25) +
-      facet_wrap(. ~ str_c(state, ", ", city), scales = "free_y") +
+      facet_wrap(. ~ str_c(city, ", ", state), scales = "free_y") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
         breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
@@ -162,7 +167,7 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
       scale_x_date(
         date_labels = "%b",
         breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
+          lubridate::date("2023-12-31") + 1,
           by = "3 months"
         )
       ) +
@@ -186,8 +191,8 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
 
   if (process) {
     p_ts_nab <- ggplot(df_ts_nab_proc) +
-      geom_point(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_mn), alpha = 0.1) +
-      geom_line(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_sm), col = "blue") +
+      geom_point(aes(x = date, y = count_mn), alpha = 0.1) +
+      geom_line(aes(x = date, y = count_sm), col = "blue") +
       facet_wrap(. ~ year, scales = "free_x") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
@@ -196,8 +201,8 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
       ) +
       scale_x_date(
         date_labels = "%b",
-        breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
+        breaks = seq(lubridate::date("2003-01-01"),
+          lubridate::date("2022-12-31") + 1,
           by = "3 months"
         )
       ) +
@@ -233,7 +238,7 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
       scale_x_date(
         date_labels = "%b",
         breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
+          lubridate::date("2023-12-31") + 1,
           by = "3 months"
         )
       ) +
@@ -257,8 +262,8 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
 
   if (process) {
     p_ts_tw <- ggplot(df_ts_tw_proc %>% filter(lubridate::year(date) != 2017)) +
-      geom_point(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_sd), alpha = 0.1) +
-      geom_line(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_sm), col = "blue") +
+      geom_point(aes(x = date, y = count_sd), alpha = 0.1) +
+      geom_line(aes(x = date, y = count_sm), col = "blue") +
       facet_wrap(. ~ year, scales = "free_x") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
@@ -267,8 +272,8 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
       ) +
       scale_x_date(
         date_labels = "%b",
-        breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
+        breaks = seq(lubridate::date("2012-01-01"),
+          lubridate::date("2022-12-31") + 1,
           by = "3 months"
         )
       ) +
@@ -288,7 +293,6 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
       )
     }
   }
-
 
   return(p_ts_tw)
 }

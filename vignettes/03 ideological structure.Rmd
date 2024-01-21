@@ -63,7 +63,7 @@ ls_df_user_ideology <- read_user_ideology()
 usethis::use_data(ls_df_user_ideology)
 ```
 
-```{r}
+```{r, eval = F}
 ls_df_group_ideology <- calc_group_ideology(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, ls_df_user_ideology = ls_df_user_ideology)
 usethis::use_data(ls_df_group_ideology)
 ```

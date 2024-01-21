@@ -20,7 +20,8 @@ Suggests:
     parallel,
     doSNOW,
     reticulate,
-    qdapRegex
+    qdapRegex,
+    tigris
 VignetteBuilder: knitr
 Vignette: 
   vignettes/vignette.Rmd

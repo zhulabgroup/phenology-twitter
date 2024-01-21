@@ -28,7 +28,7 @@ plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, sav
     ) +
     labs(
       x = "(Liberal)    Ideology score    (Conservative)",
-      y = "Probability density",
+      y = "Marginal probability density",
       fill = "Group",
       col = "Group"
     ) +

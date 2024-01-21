@@ -45,3 +45,9 @@ usethis::use_data(ls_df_group_user_type)
 ```{r}
 plot_information_flow(ls_df_group_flow = ls_df_group_flow, ls_df_group_user_type = ls_df_group_user_type, save = T)
 ```
+
+# test difference in proportions
+```{r}
+test_user_proportion(end = "from")
+test_user_proportion(end = "to")
+```

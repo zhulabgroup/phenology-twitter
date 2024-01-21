@@ -46,7 +46,21 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
     )) %>%
     ggplot() +
     geom_point(aes(x = pollen, y = tweet)) +
-    ggrepel::geom_label_repel(aes(x = pollen, y = tweet, label = state_label), fill = NA) +
+    ggrepel::geom_label_repel(
+      aes(
+        x = pollen,
+        y = tweet,
+        label = state_label
+      ),
+      size = 3,
+      color = "black",
+      fill = NA,
+      min.segment.length = 0,
+      max.overlaps = Inf,
+      label.padding = unit(.25, "lines"),
+      label.size = NA
+    ) +
+    # ggrepel::geom_label_repel(aes(x = pollen, y = tweet, label = state_label), fill = NA) +
     geom_smooth(aes(x = pollen, y = tweet), method = "lm", se = F) +
     ggpubr::stat_cor(
       aes(

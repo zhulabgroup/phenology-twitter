@@ -10,7 +10,8 @@ plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, sav
       labels = misc_subset(forlabel = T, oneline = T)
     )) %>%
     ggplot() +
-    geom_density(aes(x = ideology, fill = group, col = group), alpha = 0.5, bw = 0.2) +
+    geom_histogram(aes(x = ideology, y = after_stat(density), fill = group), color = NA, alpha = 0.5, breaks = seq(-2, 2, by = 0.5)) +
+    geom_density(aes(x = ideology, col = group), fill = NA, bw = 0.2) +
     scale_color_manual(values = c("dark green", "dark blue", "dark orange")) +
     scale_fill_manual(values = c("dark green", "dark blue", "dark orange")) +
     geom_vline(xintercept = 0, linetype = "dotted") +
@@ -28,7 +29,7 @@ plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, sav
     ) +
     labs(
       x = "(Liberal)    Ideology score    (Conservative)",
-      y = "Marginal probability density",
+      y = "Density of user ideology",
       fill = "Group",
       col = "Group"
     ) +

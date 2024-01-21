@@ -29,7 +29,8 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
         label = paste(after_stat(r.label), after_stat(p.label), sep = "~`,`~")
       ),
       p.accuracy = 0.001,
-      digits = 3
+      digits = 3,
+      show.legend = FALSE
     ) +
     labs(
       x = "Latitude of state (° N)",

@@ -22,11 +22,11 @@ plot_ideology_arrow <- function(option = 1) {
       geom_curve(
         aes(x = 0, y = 4.5, xend = 0, yend = 2),
         arrow = arrow(
-          length = unit(0.03, "npc"),
+          length = unit(0.3, "npc"),
           type = "closed" # Describes arrow head (open or closed)
         ),
         colour = "dark blue",
-        linewidth = 1.2,
+        linewidth = 2,
         angle = 90,
         curvature = -0.5
       ) +
@@ -34,11 +34,11 @@ plot_ideology_arrow <- function(option = 1) {
       geom_curve(
         aes(x = 0, y = 4.5, xend = 0, yend = -0.5),
         arrow = arrow(
-          length = unit(0.03, "npc"),
+          length = unit(0.3, "npc"),
           type = "closed" # Describes arrow head (open or closed)
         ),
         colour = "dark orange",
-        size = 1.2,
+        linewidth = 2,
         angle = 90,
         curvature = -0.5
       ) +

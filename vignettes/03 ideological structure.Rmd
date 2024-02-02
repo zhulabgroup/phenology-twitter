@@ -29,8 +29,7 @@ theme_set(ggthemes::theme_few())
 
 # Define subgroups of users
 ```{r}
-p_subgroup_venn <- plot_subgroup_venn(save = T)
-p_subgroup_venn
+(p_subgroup_venn <- plot_subgroup_venn(save = T))
 ```
 
 # sample and code tweets in subgroups

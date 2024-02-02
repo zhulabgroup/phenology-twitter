@@ -53,10 +53,14 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
       theme(axis.text.y = element_text(angle = 0)) +
       theme(strip.text = element_text(size = 12)) +
       scale_x_continuous(expand = expansion(mult = c(.02, .06))) +
-      ggtitle(case_when(
-        group == misc_subset(forlabel = F)[1] ~ str_c("a. ", misc_subset(forlabel = T, oneline = T)[1]),
-        group == misc_subset(forlabel = F)[2] ~ str_c("b. ", misc_subset(forlabel = T, oneline = T)[2]),
-        group == misc_subset(forlabel = F)[3] ~ str_c("c. ", misc_subset(forlabel = T, oneline = T)[3])
+      ggtitle(parse(
+        text =
+          case_when(
+            group == misc_subset(forlabel = F)[1] ~ str_c("a. ", misc_subset(forlabel = T, oneline = T)[1]),
+            group == misc_subset(forlabel = F)[2] ~ str_c("b. ", misc_subset(forlabel = T, oneline = T)[2]),
+            group == misc_subset(forlabel = F)[3] ~ str_c("c. ", misc_subset(forlabel = T, oneline = T)[3])
+          ) %>%
+            misc_subset_n(df_sankey %>% pull(interaction) %>% unique() %>% length())
       ))
 
     ls_p_sankey[[group]] <- p

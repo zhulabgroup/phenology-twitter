@@ -62,11 +62,10 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       scale_x_date(
         date_labels = "%b",
         breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
-          by = "3 months"
+          lubridate::date("2024-01-01"),
+          by = "6 months"
         )
       ) +
-      # facet_wrap(. ~ state, scales = "free_y") +
       theme_classic() +
       labs(
         x = NULL,
@@ -145,11 +144,10 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       scale_x_date(
         date_labels = "%b",
         breaks = seq(lubridate::date("2023-01-01"),
-          lubridate::date("2023-12-31"),
-          by = "3 months"
+          lubridate::date("2024-01-01"),
+          by = "6 months"
         )
       ) +
-      # facet_wrap(. ~ state, scales = "free_y") +
       theme_classic() +
       labs(
         x = NULL,

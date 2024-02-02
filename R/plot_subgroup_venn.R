@@ -55,8 +55,16 @@ misc_subset <- function(forlabel = F, oneline = F) {
     if (!oneline) {
       v_group <- c("discuss\npollen phenology", "attribute to\ntemperature change", "attribute to\nclimate change")
     } else {
-      v_group <- c("discuss pollen phenology", "attribute to temperature change", "attribute to climate change")
+      v_group <- c("Discuss pollen phenology", "Attribute to temperature change", "Attribute to climate change")
     }
   }
   return(v_group)
+}
+
+misc_subset_n <- function(group, n) {
+  group_n <- group %>% 
+    str_replace_all(" ", "~") %>% 
+    str_c( "~'('~italic(n)~'='~", n, "~')'")
+  
+  return(group_n)
 }

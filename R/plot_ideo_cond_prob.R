@@ -10,7 +10,7 @@ plot_ideo_cond_prob <- function(df_ideo_cond_prob, option = "climate", save = F)
       ),
       p.accuracy = 0.001,
       digits = 3,
-      label.x.npc = 0.3,
+      label.x.npc = 0.2,
       label.y.npc = "top",
       # digits = 3,
       # show.legend = F

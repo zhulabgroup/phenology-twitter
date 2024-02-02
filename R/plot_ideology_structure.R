@@ -11,14 +11,14 @@ plot_ideology_structure <- function(p_subgroup_venn, p_ideology_density, p_ideo_
                 ABCDF
                 ") +
     plot_annotation(tag_levels = list(c("a", "", "b", "", "c", "d"))) +
-    plot_layout(widths = c(0.8, 0.2, 0.5, 0.2, 0.6))
+    plot_layout(widths = c(0.8, 0.15, 0.6, 0.25, 0.5))
 
   if (save) {
     ggsave(
       plot = p,
       filename = "alldata/output/figures/main/ideology_structure.png",
       width = 12,
-      height = 5,
+      height = 6,
       device = png,
       type = "cairo"
     )

@@ -97,8 +97,8 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     theme(axis.text = element_text(size = 8))
 
   p_ts_corr <- ggplot(df_ts_compare) +
-    geom_point(aes(x = pollen, y = tweet, col = year, group = year), alpha = 0.25) +
-    geom_smooth(aes(x = pollen, y = tweet, col = year, group = year), method = "lm", se = F) +
+    geom_hex(aes(x = pollen, y = tweet), bins = 100) +
+    geom_smooth(aes(x = pollen, y = tweet), method = "lm", se = F) +
     ggpubr::stat_cor(
       aes(
         x = pollen, y = tweet,
@@ -107,7 +107,7 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
       p.accuracy = 0.001,
       digits = 3
     ) +
-    scale_color_viridis_c() +
+    scale_fill_viridis_c() +
     scale_y_continuous(
       trans = scales::sqrt_trans(),
       breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
@@ -120,9 +120,9 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     ) +
     labs(
       x = "Natural pollen phenology\n(standardized value)",
-      y = "Twitter pollen phenology\n(standardized value)",
-      col = "Year"
-    )
+      y = "Twitter pollen phenology\n(standardized value)"
+    ) +
+    guides(fill = "none")
 
   if (save) {
     ggsave(

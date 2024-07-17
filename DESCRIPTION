@@ -14,8 +14,8 @@ Depends:
     tidyverse,
     sf,
     patchwork,
-    rgdal,
-    geofacet
+    geofacet,
+    ggforce
 Suggests:
     parallel,
     doSNOW,

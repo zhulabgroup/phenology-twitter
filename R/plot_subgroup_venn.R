@@ -62,9 +62,9 @@ misc_subset <- function(forlabel = F, oneline = F) {
 }
 
 misc_subset_n <- function(group, n) {
-  group_n <- group %>% 
-    str_replace_all(" ", "~") %>% 
-    str_c( "~'('~italic(n)~'='~", n, "~')'")
-  
+  group_n <- group %>%
+    str_replace_all(" ", "~") %>%
+    str_c("~'('~italic(n)~'='~", n, "~')'")
+
   return(group_n)
 }

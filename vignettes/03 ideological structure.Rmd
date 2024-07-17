@@ -90,10 +90,10 @@ p_ideology_density <- plot_ideology_density(
 ```
 
 ```{r}
-df_ideo_cond_prob <- calc_ideo_cond_prob(df_group_ideology = df_group_ideology, df_group_sample_size = df_group_sample_size)
-p_ideo_cond_prob_temperature <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "temperature", save = T)
+df_ideo_cond_prob <- calc_ideo_cond_prob(df_group_ideology = df_group_ideology, df_group_sample_size = df_group_sample_size, R = 1000)
+p_ideo_cond_prob_temperature <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "temperature", R = 1000, save = T)
 p_ideo_cond_prob_temperature
-p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "climate", save = T)
+p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "climate", R = 1000, save = T)
 p_ideo_cond_prob_climate
 ```
 

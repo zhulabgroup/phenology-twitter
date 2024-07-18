@@ -4,6 +4,9 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
   for (group in misc_subset(forlabel = F)) {
     # Combine both data frames
     df_sankey <- ls_df_group_flow[[group]] %>%
+      group_by(to, from) %>%
+      summarise(count = n(), .groups = "drop") %>%
+      arrange(desc(count)) %>%
       mutate(interaction = row_number()) %>%
       left_join(ls_df_group_user_type[[group]], by = c("to" = "user")) %>%
       select(-to) %>%
@@ -13,9 +16,8 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
       rename(from = "type") %>%
       drop_na() %>%
       mutate(freq = count / sum(count)) %>%
-      select(-count) %>%
       mutate(from_type = from) %>%
-      gather(key = "end", value = "type", -interaction, -freq, -from_type) %>%
+      gather(key = "end", value = "type", -interaction, -freq, -from_type, -count) %>%
       mutate(end = factor(end, levels = c("from", "to") %>% rev(), labels = c("from", "to") %>% rev())) %>%
       mutate(type = factor(type, levels = c("media", "expert", "other\nindividual", "other\norganization") %>% rev())) %>%
       mutate(from_type = factor(from_type, levels = c("media", "expert", "other\nindividual", "other\norganization") %>% rev())) %>%
@@ -60,7 +62,7 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
             group == misc_subset(forlabel = F)[2] ~ str_c("b. ", misc_subset(forlabel = T, oneline = T)[2]),
             group == misc_subset(forlabel = F)[3] ~ str_c("c. ", misc_subset(forlabel = T, oneline = T)[3])
           ) %>%
-            misc_subset_n(df_sankey %>% pull(interaction) %>% unique() %>% length())
+            misc_subset_n(df_sankey %>% filter(!is.na(type_label1)) %>% pull(count) %>% sum())
       ))
 
     ls_p_sankey[[group]] <- p

@@ -68,6 +68,19 @@ usethis::use_data(ls_df_group_ideology)
 ```
 
 ```{r}
+bind_rows(ls_df_group_valid) %>% 
+  distinct(user_screen_name) %>% 
+  inner_join(bind_rows(ls_df_user_ideology)%>%
+    filter(ideology != 999) %>%
+    filter(!is.na(ideology)) %>%
+    filter(is.finite(ideology)), by = c("user_screen_name"= "user")) %>% 
+  nrow()
+```
+
+```{r}
+```
+
+```{r}
 df_group_sample_size <- ls_df_group_ideology$sample_size
 df_group_sample_size
 summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "temperature")

@@ -29,8 +29,16 @@ theme_set(ggthemes::theme_few())
 
 # get information flow
 ```{r, eval = F}
-ls_df_group_flow <- tidy_information_flow(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, writecsv = F)
-usethis::use_data(ls_df_group_flow)
+ls_df_group_flow <- tidy_information_flow(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, writecsv = T)
+usethis::use_data(ls_df_group_flow, overwrite = T)
+```
+
+```{r}
+bind_rows(ls_df_group_flow) %>%
+  distinct(id, from, to) %>%
+  inner_join(bind_rows(ls_df_group_user_type) %>% select(user) %>% distinct(), by = c("from" = "user")) %>%
+  inner_join(bind_rows(ls_df_group_user_type) %>% select(user) %>% distinct(), by = c("to" = "user")) %>%
+  nrow()
 ```
 
 # code user type

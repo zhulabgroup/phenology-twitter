@@ -83,7 +83,7 @@ df_tweet %>%
 summ_tweet(df_tweet = df_tweet)
 ```
 
-There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were used in the following analyses.
+There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were used in the following analyses. There were `r df_tweet %>% filter(!is.na(state)) %>% nrow()` tweets among these that could be resolved to states.
 
 ```{r}
 plot_tweet_type(df_tweet = df_tweet, save = T)

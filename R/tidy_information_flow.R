@@ -6,7 +6,7 @@ tidy_information_flow <- function(ls_df_group_sample, ls_df_group_valid, path_fl
     df_valid <- ls_df_group_valid[[group]]
 
     df_retweet <- df_sample %>%
-      select(user = user_screen_name, clean_text, text, type) %>%
+      select(id, user = user_screen_name, clean_text, text, type) %>%
       inner_join(df_valid %>% select(clean_text),
         by = "clean_text"
       ) %>%
@@ -25,11 +25,8 @@ tidy_information_flow <- function(ls_df_group_sample, ls_df_group_valid, path_fl
         unnest_longer(retweet)
     ) %>%
       mutate(retweet = str_replace(retweet, "RT @", "")) %>%
-      # select(to = user, from = mention) %>%
-      group_by(to = user, from = retweet) %>%
-      summarise(count = n()) %>%
-      ungroup() %>%
-      arrange(desc(count)) %>%
+      rename(to = user, from = retweet) %>%
+      select(id, to, from) %>%
       drop_na()
 
     ls_df_group_flow[[group]] <- df_flow

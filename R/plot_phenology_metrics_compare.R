@@ -10,6 +10,25 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
     by = c("state", "state_name", "lon", "lat")
   )
 
+  
+  df_coefficient <- test_st_gradient(df_st_metric_compare) %>% 
+    mutate(across(1:3, ~ signif(., 3))) %>%
+    mutate(
+      data = factor(data, 
+                    levels = c("tweet", "pollen"), 
+                    labels = c("tweet count", "pollen concentration"))
+    )
+  
+  annotation_data <- df_coefficient %>%
+    mutate(
+      x = 30,  # Fixed x-position
+      y = c(140, 130),  # Different y-values for "tweet" and "pollen"
+      label = sprintf(
+        "italic(beta) == %s~`(`~%s~`,`~%s~`)`",
+        slope, slope_lower, slope_upper
+      )
+    )
+  
   p_st_gradient <- df_st_metric_compare %>%
     gather(key = "data", value = "doy", -state, -state_name, -lon, -lat) %>%
     mutate(data = factor(data,
@@ -21,16 +40,17 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
     )) %>%
     ggplot() +
     geom_point(aes(x = lat, y = doy, col = data, group = data)) +
-    geom_smooth(aes(x = lat, y = doy, col = data, group = data), method = "lm", se = F) +
+    geom_smooth(aes(x = lat, y = doy, col = data, group = data, fill = data), method = "lm", se = T, alpha = 0.1,
+                show.legend = F) +
     scale_color_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
-    ggpubr::stat_cor(
-      aes(
-        x = lat, y = doy, col = data, group = data,
-        label = paste(after_stat(r.label), after_stat(p.label), sep = "~`,`~")
-      ),
-      p.accuracy = 0.001,
-      digits = 3,
-      show.legend = FALSE
+    scale_fill_manual(values = c("tweet count" = "dark blue", "pollen concentration" = "dark orange")) +
+    geom_text(
+      data = annotation_data, 
+      aes(x = x, y = y, label = label, col = data),
+      parse = TRUE,
+      hjust = 0,
+      size = 4,
+      show.legend = F
     ) +
     labs(
       x = "Latitude of state (° N)",
@@ -62,7 +82,7 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
       label.size = NA
     ) +
     # ggrepel::geom_label_repel(aes(x = pollen, y = tweet, label = state_label), fill = NA) +
-    geom_smooth(aes(x = pollen, y = tweet), method = "lm", se = F) +
+    geom_smooth(aes(x = pollen, y = tweet), method = "lm", se = T, alpha = 0.1) +
     ggpubr::stat_cor(
       aes(
         x = pollen, y = tweet,

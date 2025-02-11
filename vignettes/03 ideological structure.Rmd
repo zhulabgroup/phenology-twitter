@@ -68,21 +68,7 @@ usethis::use_data(ls_df_group_ideology)
 ```
 
 ```{r}
-bind_rows(ls_df_group_valid) %>% 
-  distinct(user_screen_name) %>% 
-  inner_join(bind_rows(ls_df_user_ideology)%>%
-    filter(ideology != 999) %>%
-    filter(!is.na(ideology)) %>%
-    filter(is.finite(ideology)), by = c("user_screen_name"= "user")) %>% 
-  nrow()
-```
-
-```{r}
-```
-
-```{r}
-df_group_sample_size <- ls_df_group_ideology$sample_size
-df_group_sample_size
+(df_group_sample_size <- ls_df_group_ideology$sample_size)
 summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "temperature")
 summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "climate")
 ```
@@ -90,8 +76,7 @@ summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "cl
 # ideological structure in attribution
 ```{r}
 df_group_ideology <- ls_df_group_ideology$sample
-df_summ_group_ideology <- summ_group_ideology(df_group_ideology)
-df_summ_group_ideology
+(df_summ_group_ideology <- summ_group_ideology(df_group_ideology))
 ```
 
 ```{r}
@@ -104,10 +89,8 @@ p_ideology_density <- plot_ideology_density(
 
 ```{r}
 df_ideo_cond_prob <- calc_ideo_cond_prob(df_group_ideology = df_group_ideology, df_group_sample_size = df_group_sample_size, R = 1000)
-p_ideo_cond_prob_temperature <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "temperature", R = 1000, save = T)
-p_ideo_cond_prob_temperature
-p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "climate", R = 1000, save = T)
-p_ideo_cond_prob_climate
+(p_ideo_cond_prob_temperature <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "temperature", R = 1000, save = T))
+(p_ideo_cond_prob_climate <- plot_ideo_cond_prob(df_ideo_cond_prob = df_ideo_cond_prob, option = "climate", R = 1000, save = T))
 ```
 
 ```{r}

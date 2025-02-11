@@ -17,9 +17,9 @@ calc_time_series_nab <- function(df_nab, process = F) {
       year = lubridate::year(date)
     ) %>%
     right_join(group_by(., stationid, year) %>%
-      summarise(count = n()) %>%
+      summarise(count = sum(count)) %>%
       ungroup() %>%
-      filter(count >= 100) %>% # filter for station and year with more than 100 data points
+      filter(count >= 100) %>%
       select(-count), by = c("stationid", "year")) %>%
     select(stationid, state, city, lat, lon, date, year, doy, count)
 

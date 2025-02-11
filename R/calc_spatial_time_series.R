@@ -16,6 +16,11 @@ calc_spatial_time_series_nab <- function(df_nab) {
       year = lubridate::year(date),
       doy = lubridate::yday(date)
     ) %>%
+    right_join(group_by(., stationid, year) %>%
+      summarise(count = sum(count)) %>%
+      ungroup() %>%
+      filter(count >= 100) %>%
+      select(-count), by = c("stationid", "year")) %>%
     group_by(state, year, doy) %>%
     summarise(count = mean(count, na.rm = T)) %>% # average over stations in each state
     ungroup() %>%
@@ -25,7 +30,7 @@ calc_spatial_time_series_nab <- function(df_nab) {
       n = n()
     ) %>%
     ungroup() %>%
-    filter(n >= 3) %>%
+    # filter(n >= 3) %>%
     group_by(state) %>%
     complete(doy = 1:365) %>% # add NA to gap dates
     # mutate(count_tr = count_mn^(1 / 2)) %>%
@@ -61,7 +66,7 @@ calc_spatial_time_series_twitter <- function(df_tweet, df_user_num) {
       group_by(., state, year) %>%
         summarise(count = sum(count_adj)) %>%
         ungroup() %>%
-        filter(count >= 100) %>% # select state and year with more than 100 data points
+        filter(count >= 10) %>%
         select(-count),
       by = c("state", "year")
     ) %>%
@@ -86,6 +91,7 @@ calc_spatial_time_series_twitter <- function(df_tweet, df_user_num) {
     # left_join(data.frame(state = state.x77 %>% rownames(), population = state.x77[, "Population"]), by = "state") %>%
     # mutate(state_name = tolower(state_name)) %>%
     drop_na(state)
+
 
   return(df_st_tw)
 }

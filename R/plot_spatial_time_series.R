@@ -93,7 +93,7 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
         axis.title = element_text(size = 12.5),
         plot.margin = unit(c(5.5, 8, 4, 5.5), "pt")
       ) +
-      geofacet::facet_geo(~state, scales = "free_y", grid = us_state_grid1[c(-2, -11), ])
+      geofacet::facet_geo(~state, scales = "free_y", grid = us_state_grid1)
   }
 
   if (option == "twitter" | option == "nab") {
@@ -184,7 +184,7 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
         axis.title = element_text(size = 12.5),
         plot.margin = unit(c(5.5, 8, 4, 5.5), "pt")
       ) +
-      geofacet::facet_geo(~state, scales = "free_y", grid = us_state_grid1[c(-2, -11), ])
+      geofacet::facet_geo(~state, scales = "free_y", grid = us_state_grid1)
   }
 
 

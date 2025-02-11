@@ -13,8 +13,7 @@ read_nab <- function() {
     summarise(count = sum(count, na.rm = T)) %>%
     ungroup() %>%
     left_join(df_geo, by = c("stationid" = "id")) %>%
-    filter(country == "US") %>%
-    filter(!state %in% c("AK", "PR"))
+    filter(country == "US")
 
   return(df_nab)
 }

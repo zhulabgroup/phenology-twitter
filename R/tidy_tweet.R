@@ -40,7 +40,6 @@ tidy_tweet_clean <- function(df_compiled_geo, path_process = "alldata/intermedia
       TRUE ~ "organic"
     )) %>%
     select(-reply, -retweet)
-  # nrow(df_clean)
 
   write_rds(df_clean, path_process)
 

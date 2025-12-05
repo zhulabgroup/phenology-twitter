@@ -30,7 +30,41 @@ theme_set(ggthemes::theme_few())
 # get information flow
 ```{r, eval = F}
 ls_df_group_flow <- tidy_information_flow(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, writecsv = T)
+
+# anonymize users
+df_user_id <- bind_rows(ls_df_group_flow) %>%
+  select(from, to) %>%
+  pivot_longer(everything(), values_to = "user") %>%
+  distinct(user) %>%
+  mutate(user_id = factor(user) %>% as.integer() %>% as.character())
+
+ls_df_group_flow <- lapply(ls_df_group_flow, function(df) {
+  df %>%
+    inner_join(df_user_id, by = c("from" = "user")) %>%
+    select(-from) %>%
+    rename(from = user_id) %>%
+    inner_join(df_user_id, by = c("to" = "user")) %>%
+    select(-to) %>%
+    rename(to = user_id)
+})
 usethis::use_data(ls_df_group_flow, overwrite = T)
+```
+
+# code user type
+```{r, eval = F}
+tidy_user_type(ls_df_group_flow = ls_df_group_flow, df_tweet = df_tweet)
+# manually code user type
+ls_df_group_user_type <- read_user_type()
+
+# anonymize users
+ls_df_group_user_type <- lapply(ls_df_group_user_type, function(df) {
+  df %>%
+    inner_join(df_user_id, by = c("user" = "user")) %>%
+    select(-user) %>%
+    select(user = user_id, everything())
+})
+
+usethis::use_data(ls_df_group_user_type)
 ```
 
 ```{r}
@@ -39,14 +73,6 @@ bind_rows(ls_df_group_flow) %>%
   inner_join(bind_rows(ls_df_group_user_type) %>% select(user) %>% distinct(), by = c("from" = "user")) %>%
   inner_join(bind_rows(ls_df_group_user_type) %>% select(user) %>% distinct(), by = c("to" = "user")) %>%
   nrow()
-```
-
-# code user type
-```{r, eval = F}
-tidy_user_type(ls_df_group_flow = ls_df_group_flow, df_tweet = df_tweet)
-# manually code user type
-ls_df_group_user_type <- read_user_type()
-usethis::use_data(ls_df_group_user_type)
 ```
 
 # plot sankey diagram

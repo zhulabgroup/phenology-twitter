@@ -1,5 +1,5 @@
 #' @export
-plot_ideo_cond_prob <- function(df_ideo_cond_prob, option = "climate", R = 1000, save = F) {
+plot_ideo_cond_prob <- function(df_ideo_cond_prob, option = "climate", R = 1000, save = F, save_path = "alldata/output/figures/") {
   df_summ_ideo_cond_prob <- summ_ideo_cond_prob(df_ideo_cond_prob, option = option)
   df_coefficient <- test_ideo_cond_prob(df_ideo_cond_prob, option = option, R = R)
   df_summ_coefficient <- summ_coefficient(df_coefficient, short = T)
@@ -71,7 +71,7 @@ plot_ideo_cond_prob <- function(df_ideo_cond_prob, option = "climate", R = 1000,
   if (save) {
     ggsave(
       plot = p,
-      filename = str_c("alldata/output/figures/supp/ideology_cond_prob_", option, ".png"),
+      filename = str_c(save_path, "supp/ideology_cond_prob_", option, ".png"),
       width = 6,
       height = 6,
       device = png,

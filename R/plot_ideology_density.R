@@ -1,5 +1,5 @@
 #' @export
-plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, save = F) {
+plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, save = F, save_path = "alldata/output/figures/") {
   df_sample_size <- df_group_ideology %>%
     group_by(group) %>%
     summarise(n = n())
@@ -48,7 +48,7 @@ plot_ideology_density <- function(df_group_ideology, df_summ_group_ideology, sav
   if (save) {
     ggsave(
       plot = p_ideo_density,
-      filename = "alldata/output/figures/supp/ideology_density.png",
+      filename = str_c(save_path, "supp/ideology_density.png"),
       width = 6,
       height = 8,
       device = png,

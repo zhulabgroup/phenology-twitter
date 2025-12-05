@@ -1,5 +1,5 @@
 #' @export
-plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_metric_tw = NULL, df_st_metric_nab = NULL, metricoi = "mos", save = F, option = "twitter") {
+plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_metric_tw = NULL, df_st_metric_nab = NULL, metricoi = "mos", option = "twitter", save = F, save_path = "alldata/output/figures/") {
   if (option == "compare") {
     df_st_compare <- full_join(df_st_tw %>% select(state, state_name, doy, tweet = count_sm),
       df_st_nab %>% select(state, state_name, doy, pollen = count_sm),
@@ -119,16 +119,12 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       ) +
       geom_line(
         data = df_st,
-        aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_sm) # ,
-        # col = case_when(option=="twitter"~"dark blue",
-        #                 option == "nab" ~"dark orange")
+        aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_sm)
       ) +
       geom_vline(
         data = df_st_metric %>%
           filter(metric == metricoi),
         aes(xintercept = doy + lubridate::date("2023-01-01") - 1),
-        # col = case_when(option=="twitter"~"dark blue",
-        #                 option == "nab" ~"dark orange")
         linetype = "dotted"
       ) +
       scale_fill_viridis_c(
@@ -138,8 +134,7 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
       ) +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
-        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-        # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
       ) +
       scale_x_date(
         date_labels = "%b",
@@ -191,7 +186,7 @@ plot_spatial_time_series <- function(df_st_tw = NULL, df_st_nab = NULL, df_st_me
   if (save) {
     ggsave(
       plot = p_st,
-      filename = str_c("alldata/output/figures/supp/spatiotemporal_", option, ".png"),
+      filename = str_c(save_path, "supp/spatiotemporal_", option, ".png"),
       width = 12,
       height = 12 * 0.618,
       device = png,

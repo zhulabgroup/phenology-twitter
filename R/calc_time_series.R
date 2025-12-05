@@ -25,7 +25,6 @@ calc_time_series_nab <- function(df_nab, process = F) {
 
   if (process) {
     df_ts_nab <- df_ts_nab %>%
-      # mutate(count_tr = count^(1 / 2)) %>% # squareroot transformation
       group_by(stationid) %>%
       mutate(count_sd = count / quantile(count, 0.95, na.rm = T)) %>% # standardize to approximately 0 to 1 for each station
       ungroup() %>%
@@ -64,7 +63,6 @@ calc_time_series_twitter <- function(df_tweet, df_user_num, process = F) {
 
   if (process) {
     df_ts_tw <- df_ts_tw %>%
-      # mutate(count_tr = count_adj^(1 / 2)) %>% # squareroot transformation
       mutate(count_sd = count_adj / quantile(count_adj, 0.95, na.rm = T)) %>% # standardize to roughly between 0 and 1
       mutate(count_sm = util_fill_whit(x = count_sd, maxgap = 14, lambda = 30, minseg = 2)) %>%
       select(date, year, doy, count, count_adj, count_sd, count_sm)

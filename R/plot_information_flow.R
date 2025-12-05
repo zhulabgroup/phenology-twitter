@@ -1,5 +1,5 @@
 #' @export
-plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save = F) {
+plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save = F, save_path = "alldata/output/figures/") {
   ls_p_sankey <- vector(mode = "list")
   for (group in misc_subset(forlabel = F)) {
     # Combine both data frames
@@ -74,7 +74,7 @@ plot_information_flow <- function(ls_df_group_flow, ls_df_group_user_type, save 
   if (save) {
     ggsave(
       plot = p_sankey,
-      filename = "alldata/output/figures/main/information_flow.png",
+      filename = str_c(save_path, "main/information_flow.png"),
       width = 9,
       height = 9,
       device = png,

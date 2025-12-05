@@ -1,15 +1,4 @@
 #' @export
-summ_group_sample_size <- function(df_group_sample_size, option = "temperature") {
-  cond_prob <- (df_group_sample_size %>%
-    filter(group == str_c("pollen-", option)) %>%
-    pull(total_valid)) / (df_group_sample_size %>%
-    filter(group == "pollen") %>%
-    pull(total_valid))
-
-  return(cond_prob)
-}
-
-#' @export
 summ_group_ideology <- function(df_group_ideology) {
   df_ideo_summ <- df_group_ideology %>%
     mutate(lean = case_when(

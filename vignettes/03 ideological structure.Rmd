@@ -42,7 +42,7 @@ ls_df_group_valid <- read_subgroup_label(valid = T)
 usethis::use_data(ls_df_group_valid)
 ```
 
-```{r}
+```{r, eval = F}
 set.seed(1)
 ls_df_group_valid$pollen %>%
   sample_n(3) %>%
@@ -64,18 +64,24 @@ usethis::use_data(ls_df_user_ideology)
 
 ```{r, eval = F}
 ls_df_group_ideology <- calc_group_ideology(ls_df_group_sample = ls_df_group_sample, ls_df_group_valid = ls_df_group_valid, ls_df_user_ideology = ls_df_user_ideology)
+
+# anonymize users
+ls_df_group_ideology$sample <- ls_df_group_ideology$sample %>%
+  mutate(user_id = factor(user) %>% as.integer() %>% as.character()) %>%
+  select(-user) %>%
+  select(user = user_id, everything())
+
 usethis::use_data(ls_df_group_ideology)
 ```
 
 ```{r}
 (df_group_sample_size <- ls_df_group_ideology$sample_size)
-summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "temperature")
-summ_group_sample_size(df_group_sample_size = df_group_sample_size, option = "climate")
 ```
 
 # ideological structure in attribution
 ```{r}
 df_group_ideology <- ls_df_group_ideology$sample
+
 (df_summ_group_ideology <- summ_group_ideology(df_group_ideology))
 ```
 

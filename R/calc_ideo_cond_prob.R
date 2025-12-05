@@ -23,10 +23,6 @@ calc_ideo_cond_prob <- function(df_group_ideology, df_group_sample_size, R = 100
       spread(key = "bin", value = "n") %>%
       gather(key = "bin", value = "n", -group) %>%
       mutate(n = replace_na(n, 0)) %>%
-      # group_by(group) %>%
-      # mutate(freq = n / sum(n)) %>%
-      # ungroup() %>%
-      # select(-n) %>%
       spread(key = "group", value = "n") %>%
       mutate(
         `climate | pollen` = `pollen-climate` / pollen,

@@ -33,7 +33,7 @@ theme_set(ggthemes::theme_few())
 path_compile <- read_tweet_csv()
 ```
 
-```{r}
+```{r, eval = F}
 df_compiled <- read_tweet(geo = F)
 set.seed(1)
 ```
@@ -41,7 +41,7 @@ Total number of tweets in the dataset `r df_compiled %>% nrow()`.
 
 # Reverse geo-encoder
 
-```{r}
+```{r, eval = F}
 df_summ_geo <- summarize_geo_info(df_tweet = df_compiled)
 ```
 Percentage of users with location info is `r df_summ_geo$perc`.
@@ -50,7 +50,7 @@ Percentage of users with location info is `r df_summ_geo$perc`.
 path_geo <- tidy_geo(df_tweet = df_compiled)
 ```
 
-```{r}
+```{r, eval = F}
 df_compiled_geo <- read_tweet(geo = T)
 ```
 
@@ -75,7 +75,7 @@ df_tweet <- tidy_tweet_clean(df_compiled_geo = df_compiled_geo)
 usethis::use_data(df_tweet)
 ```
 
-```{r}
+```{r, eval = F}
 df_tweet %>%
   select(text) %>%
   sample_n(10)
@@ -84,6 +84,6 @@ summ_tweet(df_tweet = df_tweet)
 
 There were `r df_tweet %>% nrow()` tweets that satisfied all criteria and were used in the following analyses. There were `r df_tweet %>% filter(!is.na(state)) %>% nrow()` tweets among these that could be resolved to states.
 
-```{r}
+```{r, eval = F}
 plot_tweet_type(df_tweet = df_tweet, save = T)
 ```

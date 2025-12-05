@@ -1,5 +1,5 @@
 #' @export
-plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, metricoi = "mos", save = F) {
+plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, metricoi = "mos", save = F, save_path = "alldata/output/figures/") {
   df_st_metric_compare <- full_join(
     df_st_metric_tw %>%
       filter(metric == metricoi) %>%
@@ -9,7 +9,6 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
       select(state, state_name, lon, lat, pollen = doy),
     by = c("state", "state_name", "lon", "lat")
   )
-
 
   df_coefficient <- test_st_gradient(df_st_metric_compare) %>%
     mutate(across(1:3, ~ signif(., 3))) %>%
@@ -103,7 +102,7 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
   if (save) {
     ggsave(
       plot = p_st_gradient,
-      filename = "alldata/output/figures/supp/phenology_metrics_gradient.png",
+      filename = str_c(save_path, "supp/phenology_metrics_gradient.png"),
       width = 6,
       height = 6,
       device = png,
@@ -112,7 +111,7 @@ plot_phenology_metrics_compare <- function(df_st_metric_tw, df_st_metric_nab, me
 
     ggsave(
       plot = p_st_corr,
-      filename = "alldata/output/figures/supp/phenology_metrics_corr.png",
+      filename = str_c(save_path, "supp/phenology_metrics_corr.png"),
       width = 6,
       height = 6,
       device = png,

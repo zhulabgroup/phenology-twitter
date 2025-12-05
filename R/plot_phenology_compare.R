@@ -1,5 +1,5 @@
 #' @export
-plot_phenology_compare <- function(p_ts_compare, p_st_compare, p_metrics_compare, save = F) {
+plot_phenology_compare <- function(p_ts_compare, p_st_compare, p_metrics_compare, save = F, save_path = "alldata/output/figures/") {
   p <- p_ts_compare$line +
     p_metrics_compare$gradient +
     p_st_compare +
@@ -16,7 +16,7 @@ plot_phenology_compare <- function(p_ts_compare, p_st_compare, p_metrics_compare
   if (save) {
     ggsave(
       plot = p,
-      filename = "alldata/output/figures/main/compare_phenology.png",
+      filename = str_c(save_path, "main/compare_phenology.png"),
       width = 12,
       height = 12,
       device = png,

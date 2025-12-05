@@ -20,13 +20,12 @@ read_user_num <- function() {
 }
 
 #' @export
-plot_user_num <- function(df_user_num, save) {
+plot_user_num <- function(df_user_num, save = F, save_path = "alldata/output/figures/") {
   p_user_num <- ggplot(df_user_num) +
     geom_point(aes(x = year, y = user_num, fill = type), pch = 21) +
     scale_fill_manual(values = c("recorded" = "black", "inferred" = "white")) +
     geom_line(aes(x = year, y = user_num)) +
     scale_x_continuous(breaks = seq(2012, 2022, by = 2)) +
-    # theme_classic() +
     labs(
       x = "Year",
       y = "US Twitter user number (million)",
@@ -37,7 +36,7 @@ plot_user_num <- function(df_user_num, save) {
   if (save) {
     ggsave(
       plot = p_user_num,
-      filename = "alldata/output/figures/supp/user_increase.png",
+      filename = str_c(save_path, "supp/user_increase.png"),
       width = 6,
       height = 6 * 0.618,
       device = png,

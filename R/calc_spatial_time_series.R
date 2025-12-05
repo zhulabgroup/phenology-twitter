@@ -30,10 +30,8 @@ calc_spatial_time_series_nab <- function(df_nab) {
       n = n()
     ) %>%
     ungroup() %>%
-    # filter(n >= 3) %>%
     group_by(state) %>%
     complete(doy = 1:365) %>% # add NA to gap dates
-    # mutate(count_tr = count_mn^(1 / 2)) %>%
     mutate(count_sd = count_mn / quantile(count_mn, 0.95, na.rm = T)) %>%
     mutate(count_sm = util_fill_whit(x = count_sd, maxgap = 14, lambda = 30, minseg = 2)) %>%
     ungroup() %>%
@@ -41,8 +39,6 @@ calc_spatial_time_series_nab <- function(df_nab) {
       state == "DC" ~ "District of Columbia",
       TRUE ~ state.name[match(state, state.abb)]
     )) %>%
-    # left_join(data.frame(state = state.x77 %>% rownames(), population = state.x77[, "Population"]), by = "state") %>%
-    # mutate(state_name = tolower(state_name))
     drop_na(state)
 
   return(df_st_nab)
@@ -79,7 +75,6 @@ calc_spatial_time_series_twitter <- function(df_tweet, df_user_num) {
     ungroup() %>%
     group_by(state) %>%
     complete(doy = 1:365) %>% # add NA to gap dates
-    # mutate(count_tr = count_mn^(1 / 2)) %>%
     mutate(count_sd = count_mn / quantile(count_mn, 0.95, na.rm = T)) %>%
     mutate(count_sm = util_fill_whit(x = count_sd, maxgap = 14, lambda = 30, minseg = 2)) %>%
     ungroup() %>%
@@ -88,10 +83,7 @@ calc_spatial_time_series_twitter <- function(df_tweet, df_user_num) {
       state == "DC" ~ "District of Columbia",
       TRUE ~ state.name[match(state, state.abb)]
     )) %>%
-    # left_join(data.frame(state = state.x77 %>% rownames(), population = state.x77[, "Population"]), by = "state") %>%
-    # mutate(state_name = tolower(state_name)) %>%
     drop_na(state)
-
 
   return(df_st_tw)
 }

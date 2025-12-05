@@ -9,7 +9,6 @@ read_subgroup_label <- function(path_coding = "alldata/intermediate/coding/", va
     return(ls_df_group_label)
   }
 
-
   if (valid) {
     ls_df_group_valid <- vector(mode = "list")
     for (group in misc_subset()) {

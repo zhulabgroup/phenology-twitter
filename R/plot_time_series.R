@@ -1,5 +1,5 @@
 #' @export
-plot_time_series <- function(df_ts_tw = NULL, df_ts_nab = NULL, option = "twitter", process = F, save = F) {
+plot_time_series <- function(df_ts_tw = NULL, df_ts_nab = NULL, option = "twitter", process = F, save = F, save_path = "alldata/output/figures/") {
   if (option == "twitter") {
     p <- plot_time_series_twitter(df_ts_tw = df_ts_tw, process = process, save = save)
   }
@@ -24,23 +24,6 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
   ) %>%
     filter(year >= 2012) %>%
     filter(year != 2017)
-
-  # df_spring <- data.frame(date = seq(lubridate::date("2012-01-01"),
-  #   lubridate::date("2022-12-31"),
-  #   by = "day"
-  # )) %>%
-  #   mutate(
-  #     year = lubridate::year(date),
-  #     month = lubridate::month(date),
-  #     doy = lubridate::yday(date)
-  #   ) %>%
-  #   filter(year != 2017) %>%
-  #   filter(month >= 2, month <= 5) %>% # Feb to May, following Anderegg et al., 2021
-  #   group_by(year) %>%
-  #   summarise(
-  #     date_min = min(date),
-  #     date_max = max(date)
-  #   )
 
   df_spring <- data.frame(year = 2012:2022) %>%
     filter(year != 2017) %>%
@@ -84,8 +67,7 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     ) +
     scale_y_continuous(
       trans = scales::sqrt_trans(),
-      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-      # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
     ) +
     facet_wrap(. ~ year, nrow = 2, scales = "free_x") +
     labs(
@@ -110,13 +92,11 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
     scale_fill_viridis_c() +
     scale_y_continuous(
       trans = scales::sqrt_trans(),
-      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-      # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
     ) +
     scale_x_continuous(
       trans = scales::sqrt_trans(),
-      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-      # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+      breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
     ) +
     labs(
       x = "Natural pollen phenology\n(standardized value)",
@@ -127,7 +107,7 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
   if (save) {
     ggsave(
       plot = p_ts_lines,
-      filename = "alldata/output/figures/supp/time_series_compare.png",
+      filename = str_c(save_path, "supp/time_series_compare.png"),
       width = 8,
       height = 8 * 0.618,
       device = png,
@@ -136,7 +116,7 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
 
     ggsave(
       plot = p_ts_corr,
-      filename = "alldata/output/figures/supp/time_series_corr.png",
+      filename = str_c(save_path, "supp/time_series_corr.png"),
       width = 6,
       height = 6,
       device = png,
@@ -150,18 +130,16 @@ plot_time_series_compare <- function(df_ts_tw, df_ts_nab, save = F) {
   return(out)
 }
 
-plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", process = F, save = F) {
+plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", process = F, save = F, save_path = "alldata/output/figures/") {
   if (!process) {
     p_ts_nab <- df_ts_nab %>%
-      # filter(state=="GA") %>%
       filter(str_detect(city, cityoi)) %>%
       ggplot() +
       geom_point(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count, group = year, col = year), alpha = 0.25) +
       facet_wrap(. ~ str_c(city, ", ", state), scales = "free_y") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
-        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-        # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
       ) +
       scale_color_viridis_c() +
       scale_x_date(
@@ -180,7 +158,7 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
     if (save) {
       ggsave(
         plot = p_ts_nab,
-        filename = "alldata/output/figures/supp/time_series_nab.png",
+        filename = str_c(save_path, "supp/time_series_nab.png"),
         width = 8,
         height = 8 * 0.618,
         device = png,
@@ -196,8 +174,7 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
       facet_wrap(. ~ year, scales = "free_x") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
-        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-        # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
       ) +
       scale_x_date(
         date_labels = "%b",
@@ -214,7 +191,7 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
     if (save) {
       ggsave(
         plot = p_ts_nab,
-        filename = "alldata/output/figures/supp/time_series_nab_proc.png",
+        filename = str_c(save_path, "supp/time_series_nab_proc.png"),
         width = 12,
         height = 12 * 0.618,
         device = png,
@@ -225,14 +202,13 @@ plot_time_series_nab <- function(df_ts_nab = df_ts_nab, cityoi = "Marietta", pro
   return(p_ts_nab)
 }
 
-plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
+plot_time_series_twitter <- function(df_ts_tw, process = F, save = F, save_path = "alldata/output/figures/") {
   if (!process) {
     p_ts_tw <- ggplot(df_ts_tw) +
       geom_point(aes(x = doy + lubridate::date("2023-01-01") - 1, y = count_adj, group = year, col = year), alpha = 0.25) +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
-        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-        # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
       ) +
       scale_color_viridis_c() +
       scale_x_date(
@@ -251,7 +227,7 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
     if (save) {
       ggsave(
         plot = p_ts_tw,
-        filename = "alldata/output/figures/supp/time_series_twitter.png",
+        filename = str_c(save_path, "supp/time_series_twitter.png"),
         width = 8,
         height = 8 * 0.618,
         device = png,
@@ -267,8 +243,7 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
       facet_wrap(. ~ year, scales = "free_x") +
       scale_y_continuous(
         trans = scales::sqrt_trans(),
-        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2) # ,
-        # labels = scales::trans_format(function(x) x^(1 / 2), scales::math_format(.x^2))
+        breaks = scales::trans_breaks(function(x) x^(1 / 2), function(x) x^2)
       ) +
       scale_x_date(
         date_labels = "%b",
@@ -285,7 +260,7 @@ plot_time_series_twitter <- function(df_ts_tw, process = F, save = F) {
     if (save) {
       ggsave(
         plot = p_ts_tw,
-        filename = "alldata/output/figures/supp/time_series_twitter_proc.png",
+        filename = str_c(save_path, "supp/time_series_twitter_proc.png"),
         width = 12,
         height = 12 * 0.618,
         device = png,

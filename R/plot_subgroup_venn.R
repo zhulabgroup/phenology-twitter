@@ -1,5 +1,5 @@
 #' @export
-plot_subgroup_venn <- function(save = F) {
+plot_subgroup_venn <- function(save = F, save_path = "alldata/output/figures/") {
   p <- ggplot() +
     ggforce::geom_circle(aes(x0 = 0, y0 = 2, r = 3), fill = "dark green", col = "dark green", alpha = 0.5) +
     ggforce::geom_circle(aes(x0 = 0, y0 = 1, r = 2), fill = "white", col = "white", alpha = 1) +
@@ -35,7 +35,7 @@ plot_subgroup_venn <- function(save = F) {
   if (save) {
     ggsave(
       plot = p,
-      filename = "alldata/output/figures/supp/subgroup_venn.png",
+      filename = str_c(save_path, "supp/subgroup_venn.png"),
       width = 4,
       height = 4,
       device = png,

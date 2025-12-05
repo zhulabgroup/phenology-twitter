@@ -23,6 +23,4 @@ Suggests:
     qdapRegex,
     tigris
 VignetteBuilder: knitr
-Vignette: 
-  vignettes/vignette.Rmd
 LazyData: true

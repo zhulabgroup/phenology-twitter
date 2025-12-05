@@ -34,9 +34,12 @@ df_user_num <- read_user_num()
 plot_user_num(df_user_num = df_user_num, save = T)
 ```
 
-```{r}
+```{r, eval = F}
 df_ts_tw <- calc_time_series(df_tweet = df_tweet, df_user_num = df_user_num, option = "twitter")
 usethis::use_data(df_ts_tw, overwrite = T)
+```
+
+```{r}
 plot_time_series(df_ts_tw = df_ts_tw, option = "twitter", save = T)
 summ_time_series_twitter(df_ts_tw = df_ts_tw)
 ```
@@ -45,9 +48,12 @@ Processing steps
 - Standardize to approximately between 0 and 1
 - Whittaker smoothing with gap filling
 
-```{r}
+```{r, eval = F}
 df_ts_tw_proc <- calc_time_series(df_tweet = df_tweet, df_user_num = df_user_num, option = "twitter", process = T)
 usethis::use_data(df_ts_tw_proc, overwrite = T)
+```
+
+```{r}
 plot_time_series(df_ts_tw = df_ts_tw_proc, option = "twitter", process = T, save = T)
 ```
 
@@ -58,14 +64,10 @@ summ_ts_spring(df_ts_tw = df_ts_tw)
 # NAB time series
 ```{r, eval = F}
 df_nab <- read_nab()
-usethis::use_data(df_nab)
-```
-
-```{r}
 plot_nab_map(df_nab = df_nab, save = T)
 ```
 
-```{r}
+```{r, eval = F}
 df_ts_nab <- calc_time_series(df_nab = df_nab, option = "nab")
 usethis::use_data(df_ts_nab, overwrite = T)
 
@@ -79,9 +81,12 @@ Processing steps
 - Average over all stations
 - Whittaker smoothing with gap filling
 
-```{r}
+```{r, eval = F}
 df_ts_nab_proc <- calc_time_series(df_nab = df_nab, option = "nab", process = T)
 usethis::use_data(df_ts_nab_proc, overwrite = T)
+```
+
+```{r}
 plot_time_series(df_ts_nab = df_ts_nab_proc, option = "nab", process = T, save = T)
 ```
 
@@ -91,7 +96,7 @@ plot_time_series(df_ts_nab = df_ts_nab_proc, option = "nab", process = T, save =
 ```
 
 ## Spatiotemporal analysis
-```{r}
+```{r, eval = F}
 df_st_tw <- calc_spatial_time_series(df_tweet = df_tweet, df_user_num = df_user_num, option = "twitter")
 usethis::use_data(df_st_tw, overwrite = T)
 
@@ -104,9 +109,12 @@ plot_spatial_time_series(df_st_tw = df_st_tw, df_st_metric_tw = df_st_metric_tw,
 usethis::use_data(df_st_metric_tw, overwrite = T)
 ```
 
-```{r}
+```{r, eval = F}
 df_st_nab <- calc_spatial_time_series(df_nab = df_nab, option = "nab")
 usethis::use_data(df_st_nab, overwrite = T)
+```
+
+```{r}
 df_st_metric_nab <- calc_spatiotemporal_metrics(df_st = df_st_nab)
 plot_spatial_time_series(df_st_nab = df_st_nab, df_st_metric_nab = df_st_metric_nab, save = T, option = "nab")
 usethis::use_data(df_st_metric_nab, overwrite = T)

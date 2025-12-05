@@ -1,5 +1,5 @@
 #' @export
-plot_tweet_type <- function(df_tweet, save = F) {
+plot_tweet_type <- function(df_tweet, save = F, save_path = "alldata/output/figures/") {
   p_tweet_type <- df_tweet %>%
     group_by(type) %>%
     summarise(count = n()) %>%
@@ -19,7 +19,7 @@ plot_tweet_type <- function(df_tweet, save = F) {
   if (save) {
     ggsave(
       plot = p_tweet_type,
-      filename = "alldata/output/figures/supp/tweet_type.png",
+      filename = str_c(save_path, "supp/tweet_type.png"),
       width = 6,
       height = 6,
       device = png,

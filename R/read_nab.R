@@ -19,7 +19,7 @@ read_nab <- function() {
 }
 
 #' @export
-plot_nab_map <- function(df_nab, save = F) {
+plot_nab_map <- function(df_nab, save = F, save_path = "alldata/output/figures/") {
   df_nab_meta <- df_nab %>%
     drop_na(count) %>%
     group_by(stationid, name, city, state, lat, lon, country) %>%
@@ -44,7 +44,7 @@ plot_nab_map <- function(df_nab, save = F) {
   if (save) {
     ggsave(
       plot = p_nab_map,
-      filename = "alldata/output/figures/supp/nab_map.png",
+      filename = str_c(save_path, "supp/nab_map.png"),
       width = 8,
       height = 6,
       device = png,

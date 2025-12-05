@@ -46,7 +46,6 @@ df_summ_geo <- summarize_geo_info(df_tweet = df_compiled)
 ```
 Percentage of users with location info is `r df_summ_geo$perc`.
 
-
 ```{r, eval = F}
 path_geo <- tidy_geo(df_tweet = df_compiled)
 ```

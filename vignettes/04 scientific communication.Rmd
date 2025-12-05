@@ -56,6 +56,6 @@ plot_information_flow(ls_df_group_flow = ls_df_group_flow, ls_df_group_user_type
 
 # test difference in proportions
 ```{r}
-test_user_proportion(end = "from")
-test_user_proportion(end = "to")
+test_user_proportion(ls_df_group_flow, ls_df_group_user_type, end = "from")
+test_user_proportion(ls_df_group_flow, ls_df_group_user_type, end = "to")
 ```

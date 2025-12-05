@@ -118,8 +118,6 @@ usethis::use_data(df_st_metric_nab, overwrite = T)
 (p_metrics_compare <- plot_phenology_metrics_compare(df_st_metric_tw = df_st_metric_tw %>% filter(!state %in% c("AK", "HI")), df_st_metric_nab = df_st_metric_nab, metricoi = "mos", save = T))
 ```
 
-(Animation code not transcribed.)
-
 ```{r}
 plot_phenology_compare(p_ts_compare = p_ts_compare, p_st_compare = p_st_compare, p_metrics_compare = p_metrics_compare, save = T)
 ```
